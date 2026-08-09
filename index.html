@@ -37,8 +37,8 @@
 
     <section class="filter-bar reveal" aria-label="مرشحات البيانات">
       <div><label for="serviceFilter">الخدمة</label><select id="serviceFilter"><option value="all">جميع الخدمات</option></select></div>
-      <div><label for="statusFilter">الحالة</label><select id="statusFilter"><option value="all">جميع الحالات</option><option value="done">منجز</option><option value="progress">قيد العمل</option><option value="pending">بانتظار إجراء</option><option value="risk">متعثّر / خطر</option></select></div>
-      <div><label for="priorityFilter">الأولوية</label><select id="priorityFilter"><option value="all">كل الأولويات</option><option value="critical">حرجة</option><option value="high">عالية</option><option value="normal">اعتيادية</option></select></div>
+      <div><label for="statusFilter">الحالة</label><select id="statusFilter"><option value="all">جميع الحالات</option><option value="done">منجز</option><option value="progress">قيد التنفيذ</option><option value="pending">بانتظار إجراء</option><option value="risk">متعثّر أو معرّض للخطر</option></select></div>
+      <div><label for="priorityFilter">الأولوية</label><select id="priorityFilter"><option value="all">جميع الأولويات</option><option value="critical">حرجة</option><option value="high">عالية</option><option value="normal">اعتيادية</option></select></div>
       <div class="search"><label for="searchInput">بحث</label><input id="searchInput" type="search" placeholder="ابحث عن متطلب أو خدمة…"></div>
       <button id="resetFilters" class="ghost-btn">إعادة الضبط</button>
     </section>
@@ -57,12 +57,12 @@
         <div class="chart-key"><span><i class="green"></i> مخرجات</span><span><i class="gold"></i> مراسلات ومتابعات</span></div>
       </article>
       <article class="glass attention-card">
-        <header><div><p class="eyebrow">رادار القيادة</p><h2>ما يحتاج قراراً</h2></div></header>
+        <header><div><p class="eyebrow">رادار القيادة</p><h2>الموضوعات التي تتطلب قرارًا</h2></div></header>
         <div id="decisionList"></div>
       </article>
     </section>
 
-    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2>كل موضوع، أين وصل؟</h2></div><p id="resultsCount"></p></section>
+    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2>الحالة التنفيذية لكل محفظة</h2></div><p id="resultsCount"></p></section>
     <section id="servicesGrid" class="services-grid"></section>
 
     <section class="split-grid reveal">

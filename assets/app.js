@@ -1,5 +1,5 @@
 const COLORS={done:'#38c995',progress:'#d2b46d',pending:'#60aee8',risk:'#e5786d',study:'#9c89d9',out:'#637872',unclassified:'#8b9a96'};
-const STATUS={done:'منجز / قبول تشغيلي',progress:'قيد العمل',pending:'بانتظار إجراء',risk:'متعثر / خطر'};
+const STATUS={done:'منجز ومقبول تشغيليًا',progress:'قيد التنفيذ',pending:'بانتظار إجراء',risk:'متعثر أو معرّض للخطر'};
 let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',search:''},raf=[];
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -46,7 +46,7 @@ function announceWeekChange(){const w=week(),toast=$('#weekToast');document.body
 function renderMetrics(){
   const w=week(), ps=relevant(), active=ps.filter(p=>p.status==='progress'||p.status==='risk').length;
   const cards=[
-    ['إجمالي محفظة المتطلبات',DB.requirements.reportedTotal,'آخر رقم مبلغ عنه','accent'],
+    ['إجمالي محفظة المتطلبات',DB.requirements.reportedTotal,'أحدث إجمالي مُبلّغ عنه','accent'],
     ['الموثق بنداً بنداً',DB.requirements.documentedBaseline,'خط الأساس V12.03',''],
     ['تحت المطابقة',DB.requirements.underReconciliation,'إضافات جديدة',''],
     ['مخرجات الأسبوع',w.metrics.outputs,'وثيقة أو قرار أو إطلاق',''],
@@ -67,7 +67,7 @@ function drawDonut(){
 }
 function drawTrend(){
   const c=$('#trendChart'),{ctx,w,h}=setupCanvas(c,230),pad={x:32,y:28},weeks=DB.weeks,max=Math.max(...weeks.flatMap(x=>[x.metrics.outputs,x.metrics.communications]))+3;
-  $('#activityTotal').textContent=`${ar(week().metrics.outputs+week().metrics.communications)} حركة في الأسبوع`;
+  $('#activityTotal').textContent=`${ar(week().metrics.outputs+week().metrics.communications)} نشاطًا موثقًا خلال الأسبوع`;
   animate(1050,p=>{ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=pad.y+i*(h-pad.y*2)/3;ctx.beginPath();ctx.moveTo(pad.x,y);ctx.lineTo(w-pad.x,y);ctx.stroke()}
     [['outputs',COLORS.done],['communications',COLORS.progress]].forEach(([key,color])=>{const pts=weeks.map((x,i)=>[pad.x+i*(w-pad.x*2)/(weeks.length-1),h-pad.y-(x.metrics[key]/max)*(h-pad.y*2)*p]);ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.shadowBlur=12;ctx.shadowColor=color;pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.shadowBlur=0;pts.forEach(([x,y])=>{ctx.beginPath();ctx.fillStyle=color;ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()})});
     ctx.fillStyle='#9ab0aa';ctx.font='11px Segoe UI';ctx.textAlign='center';weeks.forEach((x,i)=>ctx.fillText(x.label.replace(' · 2026',''),pad.x+i*(w-pad.x*2)/(weeks.length-1),h-6));
@@ -107,7 +107,7 @@ function openPortfolio(id){
 
 function renderTimeline(){$('#timeline').innerHTML=week().timeline.map(t=>`<div class="timeline-item"><time>${esc(t.date)}</time><b>${esc(t.title)}</b><p>${esc(t.detail)}</p></div>`).join('')}
 function renderBaseline(){
-  const rows=[['خط الأساس الموثق',DB.requirements.documentedBaseline],['إضافات تحت المطابقة',DB.requirements.underReconciliation],['الإجمالي المبلغ عنه',DB.requirements.reportedTotal]];
+  const rows=[['خط الأساس الموثق',DB.requirements.documentedBaseline],['إضافات قيد المطابقة',DB.requirements.underReconciliation],['الإجمالي المُبلّغ عنه',DB.requirements.reportedTotal]];
   $('#baselineBreakdown').innerHTML=rows.map(([l,v])=>`<div class="baseline-row"><div><span>${l}</span><b>${ar(v)}</b></div><div class="bar"><i style="width:${v/DB.requirements.reportedTotal*100}%"></i></div></div>`).join('')+`<p class="service-meta">المصدر: ${esc(DB.requirements.source)}</p>`;
 }
 function countUp(el,target){const start=performance.now(),dur=750;function tick(now){let p=Math.min(1,(now-start)/dur);el.textContent=ar(Math.round(target*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(tick)}requestAnimationFrame(tick)}
