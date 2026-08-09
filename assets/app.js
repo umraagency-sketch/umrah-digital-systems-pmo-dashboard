@@ -41,7 +41,7 @@ function render(){
   renderMetrics(); renderCharts(); renderDecisions(); renderServices(); renderTimeline(); renderBaseline();
 }
 
-function announceWeekChange(){const w=week(),toast=$('#weekToast');document.body.classList.remove('week-switched');void document.body.offsetWidth;document.body.classList.add('week-switched');toast.textContent=`تم تحميل ${w.label}: ${w.metrics.outputs} مخرجات و${w.metrics.decisions} قرارات`;toast.classList.add('show');clearTimeout(announceWeekChange.timer);announceWeekChange.timer=setTimeout(()=>toast.classList.remove('show'),2600)}
+function announceWeekChange(){const w=week(),toast=$('#weekToast');document.body.classList.remove('week-switched');void document.body.offsetWidth;document.body.classList.add('week-switched');toast.textContent=`تم تحميل ${w.label}: ${w.metrics.outputs} مخرجات و${w.metrics.decisions} قرارات`;toast.classList.add('show');clearTimeout(announceWeekChange.timer);announceWeekChange.timer=setTimeout(()=>{toast.classList.remove('show');document.body.classList.remove('week-switched')},2600)}
 
 function renderMetrics(){
   const w=week(), ps=relevant(), active=ps.filter(p=>p.status==='progress'||p.status==='risk').length;
@@ -75,11 +75,11 @@ function drawTrend(){
 }
 function animate(ms,draw){const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,start=performance.now();function tick(now){const p=reduced?1:Math.min(1,(now-start)/ms),ease=1-Math.pow(1-p,3);draw(ease);if(p<1)raf.push(requestAnimationFrame(tick))}raf.push(requestAnimationFrame(tick))}
 
-function renderDecisions(){$('#decisionList').innerHTML=DB.decisions.map(d=>`<div class="decision"><span>${esc(d.priority)}</span><b>${esc(d.title)}</b><small>${esc(d.detail)}</small></div>`).join('')}
+function renderDecisions(){$('#decisionList').innerHTML=DB.decisions.map(d=>`<div class="decision ${d.priority==='حرج'?'needs-attention':''}"><span>${esc(d.priority)}</span><b>${esc(d.title)}</b><small>${esc(d.detail)}</small></div>`).join('')}
 
 function renderServices(){
   const ps=filtered(); $('#resultsCount').textContent=`عرض ${ar(ps.length)} من ${ar(relevant().length)} محفظة نشطة في الفترة`;
-  $('#servicesGrid').innerHTML=ps.length?ps.map((p,i)=>`<article class="service-card" style="--status:${COLORS[p.status]};--progress:${p.progress}%;animation-delay:${i*55}ms">
+  $('#servicesGrid').innerHTML=ps.length?ps.map((p,i)=>`<article class="service-card ${p.status==='risk'||p.priority==='critical'?'needs-attention':''}" style="--status:${COLORS[p.status]};--progress:${p.progress}%;animation-delay:${i*55}ms">
     <div class="card-top"><div><span class="service-code">${p.code} · ${esc(p.type)}</span><h3>${esc(p.name)}</h3></div><span class="badge">${STATUS[p.status]}</span></div>
     <p class="service-meta">${esc(p.owner)} · نطاق المحفظة تحت المطابقة البندية</p>
     <div class="progress-line"><i></i></div><div class="progress-label"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>
