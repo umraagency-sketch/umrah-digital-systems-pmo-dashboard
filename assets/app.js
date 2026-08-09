@@ -10,7 +10,9 @@ async function boot(){
   try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); render(); reveal();
-  const printId=new URLSearchParams(location.search).get('print');if(printId&&DB.portfolios.some(p=>p.id===printId)){openPortfolio(printId);document.body.classList.add('print-portfolio')}
+  const params=new URLSearchParams(location.search),printId=params.get('print'),weeklyId=params.get('weekly');
+  if(printId&&DB.portfolios.some(p=>p.id===printId)){openPortfolio(printId);document.body.classList.add('print-portfolio')}
+  if(weeklyId&&DB.weeks.some(w=>w.id===weeklyId)){state.week=weeklyId;$('#weekFilter').value=weeklyId;render();openWeeklyReport();document.body.classList.add('print-weekly')}
 }
 
 function fillFilters(){
@@ -28,8 +30,11 @@ function bind(){
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
   $('#dataDialog .close').addEventListener('click',()=>$('#dataDialog').close());
   $('#portfolioDialog .close').addEventListener('click',()=>$('#portfolioDialog').close());
+  $('#weeklyReportBtn').addEventListener('click',openWeeklyReport);
+  $('#weeklyReportDialog .close').addEventListener('click',()=>$('#weeklyReportDialog').close());
+  $('#weeklyReportDialog').addEventListener('click',e=>{if(e.target.closest('[data-week-print]')){document.body.classList.add('print-weekly');window.print()}});
   $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');window.print()}});
-  addEventListener('afterprint',()=>document.body.classList.remove('print-portfolio'));
+  addEventListener('afterprint',()=>document.body.classList.remove('print-portfolio','print-weekly'));
   $('#servicesGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-open]');if(btn)openPortfolio(btn.dataset.open)});
   addEventListener('resize',debounce(renderCharts,180));
 }
@@ -91,6 +96,31 @@ function renderServices(){
     <div class="next-action" style="margin-top:8px"><span>الدعم المطلوب</span>${esc(p.support)}</div>
     <button class="portfolio-open" data-open="${p.id}">فتح غرفة المتابعة ←</button>
   </article>`).join(''):'<div class="empty">لا توجد محافظ تطابق المرشحات الحالية.</div>';
+}
+
+function openWeeklyReport(){
+  const w=week(),ps=relevant(),avg=ps.length?Math.round(ps.reduce((s,p)=>s+p.progress,0)/ps.length):0;
+  const statusCount=s=>ps.filter(p=>p.status===s).length;
+  const attention=ps.filter(p=>p.priority==='critical'||p.status==='risk');
+  $('#weeklyReport').innerHTML=`
+    <section class="weekly-page weekly-page-summary">
+      <header class="weekly-report-head"><img src="assets/ministry-logo.png" alt="وزارة الحج والعمرة"><div><span>إدارة متابعة الأنظمة الرقمية · وكالة العمرة</span><h1>تقرير الإنجاز الأسبوعي</h1><p>${esc(w.label)} · ${esc(w.period)}</p></div><button data-week-print>طباعة / حفظ PDF</button></header>
+      <div class="weekly-hero"><span>الملخص التنفيذي</span><h2>${esc(w.summary)}</h2><p>يعرض التقرير المحافظ التي سُجل عليها نشاط خلال الفترة، ويربط آخر تحديث بالتقدم والإجراء القادم.</p></div>
+      <div class="weekly-metrics">
+        <article><b>${ar(ps.length)}</b><span>محافظ عليها نشاط</span></article><article><b>${ar(w.metrics.outputs)}</b><span>مخرجات الأسبوع</span></article><article><b>${ar(w.metrics.communications)}</b><span>مراسلات ومتابعات</span></article><article><b>${ar(w.metrics.decisions)}</b><span>قرارات وتوجيهات</span></article><article><b>${ar(avg)}%</b><span>متوسط تقدم المحافظ</span></article>
+      </div>
+      <section class="weekly-pulse"><div><span>نبض المحفظة</span><b>${ar(statusCount('progress'))} قيد التنفيذ · ${ar(statusCount('done'))} منجزة · ${ar(statusCount('pending'))} بانتظار إجراء</b></div><div class="weekly-progress"><i style="width:${avg}%"></i></div><small>مؤشر تقديري لتقدم المحافظ النشطة في الأسبوع، ولا يمثل نسبة الإغلاق البندية.</small></section>
+      <div class="weekly-summary-grid">
+        <section><h3>أبرز أحداث الأسبوع</h3><div class="weekly-events">${w.timeline.map((x,i)=>`<article><i>${ar(i+1)}</i><div><time>${esc(x.date)}</time><b>${esc(x.title)}</b><p>${esc(x.detail)}</p></div></article>`).join('')}</div></section>
+        <section><h3>رادار الأولوية</h3><div class="weekly-attention">${(attention.length?attention:ps.slice(0,3)).slice(0,4).map(p=>`<article><span>${p.priority==='critical'?'حرجة':'عالية'}</span><b>${esc(p.name)}</b><p>${esc(p.next)}</p></article>`).join('')}</div></section>
+      </div>
+    </section>
+    <section class="weekly-page weekly-page-portfolios">
+      <header class="weekly-section-head"><div><span>${esc(w.label)}</span><h2>المحافظ التي شهدت نشاطًا</h2></div><b>${ar(ps.length)} محافظ</b></header>
+      <div class="weekly-portfolio-grid">${ps.map(p=>`<article style="--weekly-status:${COLORS[p.status]}"><div class="weekly-card-head"><div><small>${esc(p.code)} · ${esc(p.type)}</small><h3>${esc(p.name)}</h3></div><span>${STATUS[p.status]}</span></div><div class="weekly-card-progress"><i style="width:${p.progress}%"></i></div><div class="weekly-card-score"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div><p><strong>آخر تحديث:</strong> ${esc(p.lastUpdate)}</p><p><strong>الإجراء القادم:</strong> ${esc(p.next)}</p></article>`).join('')}</div>
+      <footer class="weekly-report-foot"><span>المصدر: قاعدة بيانات المتابعة الأسبوعية والمراسلات الموثقة</span><span>${esc(DB.meta.lastUpdated)}</span></footer>
+    </section>`;
+  $('#weeklyReportDialog').showModal();
 }
 
 function openPortfolio(id){

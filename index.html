@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071916">
   <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
   <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
-  <link rel="stylesheet" href="assets/styles.css?v=20260809-print4">
+  <link rel="stylesheet" href="assets/styles.css?v=20260809-weekly1">
 </head>
 <body>
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -32,6 +32,7 @@
         <strong id="weekPeriod"></strong>
         <small id="weekDataNote"></small>
         <div id="weekSignals" class="week-signals" aria-live="polite"></div>
+        <button id="weeklyReportBtn" class="weekly-report-btn">تقرير الأسبوع PDF</button>
       </div>
     </section>
 
@@ -90,7 +91,11 @@
     <button class="close" aria-label="إغلاق">×</button>
     <div id="portfolioDetail"></div>
   </dialog>
+  <dialog id="weeklyReportDialog" class="weekly-report-dialog">
+    <button class="close" aria-label="إغلاق">×</button>
+    <div id="weeklyReport"></div>
+  </dialog>
   <div id="weekToast" class="week-toast" role="status" aria-live="polite"></div>
-  <script src="assets/app.js?v=20260809-incentives1" defer></script>
+  <script src="assets/app.js?v=20260809-weekly1" defer></script>
 </body>
 </html>
