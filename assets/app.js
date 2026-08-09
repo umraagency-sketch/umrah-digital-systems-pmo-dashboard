@@ -10,6 +10,7 @@ async function boot(){
   try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); render(); reveal();
+  const printId=new URLSearchParams(location.search).get('print');if(printId&&DB.portfolios.some(p=>p.id===printId)){openPortfolio(printId);document.body.classList.add('print-portfolio')}
 }
 
 function fillFilters(){
