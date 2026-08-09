@@ -27,6 +27,8 @@ function bind(){
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
   $('#dataDialog .close').addEventListener('click',()=>$('#dataDialog').close());
   $('#portfolioDialog .close').addEventListener('click',()=>$('#portfolioDialog').close());
+  $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');window.print()}});
+  addEventListener('afterprint',()=>document.body.classList.remove('print-portfolio'));
   $('#servicesGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-open]');if(btn)openPortfolio(btn.dataset.open)});
   addEventListener('resize',debounce(renderCharts,180));
 }
@@ -92,10 +94,12 @@ function renderServices(){
 
 function openPortfolio(id){
   const p=DB.portfolios.find(x=>x.id===id),d=DETAILS[id],items=d?.workItems||p.achieved.map((x,i)=>({id:`${p.code}-${i+1}`,title:x,status:'done',owner:p.owner,evidence:'تحديث المحفظة',next:p.next,support:p.support}));
+  const milestones=d?.milestones||[...p.achieved.map((x,i)=>({date:`معلم ${ar(i+1)}`,title:x,status:'done',detail:'مخرج موثق ضمن سجل المحفظة.',evidence:'سجل تحديثات المحفظة'})),{date:'آخر تحديث',title:'الحالة التنفيذية الحالية',status:p.status,detail:p.lastUpdate,evidence:'آخر تحديث مسجل'}];
   const stats=['done','progress','pending','risk'].map(s=>({s,n:items.filter(x=>x.status===s).length}));
   const e=d?.evm,sv=e?e.earned-e.planned:null,spi=e&&e.planned?e.earned/e.planned:null,cv=e?.actualCost!=null?e.earned-e.actualCost:null,cpi=e?.actualCost?e.earned/e.actualCost:null;
-  $('#portfolioDetail').innerHTML=`<p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>
+  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>
     <div class="detail-stats">${stats.map(x=>`<div><b>${ar(x.n)}</b><span>${STATUS[x.s]}</span></div>`).join('')}</div>
+    <section class="milestone-section"><div class="milestone-heading"><div><p class="eyebrow">السجل الزمني</p><h3>سجل الأحداث والمعالم الرئيسية</h3></div><span>${ar(milestones.length)} معالم</span></div><div class="milestone-rail">${milestones.map((m,i)=>`<article class="milestone ${m.status}"><i>${ar(i+1)}</i><div><time>${esc(m.date)}</time><b>${esc(m.title)}</b><p>${esc(m.detail)}</p><small>الدليل: ${esc(m.evidence)}</small></div><span>${STATUS[m.status]||esc(m.status)}</span></article>`).join('')}</div></section>
     ${d?.governance?`<section class="governance-section"><h3>السجل الرأسي للحوكمة والمتابعة</h3><div class="governance-rail">${d.governance.map((x,i)=>`<article><i>${ar(i+1)}</i><div><span>${esc(x.level)}</span><b>${esc(x.party)}</b><small>${esc(x.duty)}</small></div></article>`).join('')}</div></section>`:''}
     ${e?`<section class="evm-section"><header><div><h3>القيمة المكتسبة EVM</h3><small>${esc(e.basis)}</small></div><span>${esc(e.unit)}</span></header><div class="evm-grid"><div><span>خط الأساس BAC</span><b>${ar(e.baseline)}</b></div><div><span>القيمة المخططة PV</span><b>${ar(e.planned)}</b></div><div><span>القيمة المكتسبة EV</span><b>${ar(e.earned)}</b></div><div class="${sv<0?'negative':'positive'}"><span>انحراف الجدول SV</span><b>${sv>0?'+':''}${ar(sv)}</b></div><div class="${spi<1?'negative':'positive'}"><span>مؤشر الجدول SPI</span><b>${spi.toFixed(2)}</b></div><div><span>انحراف التكلفة CV</span><b>${cv==null?'غير متاح':ar(cv)}</b></div><div><span>مؤشر التكلفة CPI</span><b>${cpi==null?'غير متاح':cpi.toFixed(2)}</b></div></div></section>`:''}
     ${d?.decisions?`<section class="decision-strip"><h3>القرارات والتوجهات</h3>${d.decisions.map(x=>`<span>${esc(x)}</span>`).join('')}</section>`:''}
