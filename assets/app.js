@@ -20,7 +20,7 @@ function fillFilters(){
 }
 
 function bind(){
-  ['weekFilter','serviceFilter','statusFilter','priorityFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render()}));
+  ['weekFilter','serviceFilter','statusFilter','priorityFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
   $('#searchInput').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderServices()});
   $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,service:'all',status:'all',priority:'all',search:''};fillFilters();$('#statusFilter').value='all';$('#priorityFilter').value='all';$('#searchInput').value='';render()});
   $('#presentationBtn').addEventListener('click',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
@@ -37,8 +37,11 @@ function filtered(){return relevant().filter(p=>(state.service==='all'||p.id===s
 
 function render(){
   const w=week(); $('#weekPeriod').textContent=w.period; $('#weekDataNote').textContent=w.quality;
+  $('#weekSignals').innerHTML=`<b>${esc(w.summary)}</b><span>${ar(w.metrics.outputs)} مخرجات</span><span>${ar(w.metrics.communications)} مراسلة ومتابعة</span><span>${ar(w.metrics.decisions)} قرارات</span>`;
   renderMetrics(); renderCharts(); renderDecisions(); renderServices(); renderTimeline(); renderBaseline();
 }
+
+function announceWeekChange(){const w=week(),toast=$('#weekToast');document.body.classList.remove('week-switched');void document.body.offsetWidth;document.body.classList.add('week-switched');toast.textContent=`تم تحميل ${w.label}: ${w.metrics.outputs} مخرجات و${w.metrics.decisions} قرارات`;toast.classList.add('show');clearTimeout(announceWeekChange.timer);announceWeekChange.timer=setTimeout(()=>toast.classList.remove('show'),2600)}
 
 function renderMetrics(){
   const w=week(), ps=relevant(), active=ps.filter(p=>p.status==='progress'||p.status==='risk').length;
