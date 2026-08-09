@@ -1,6 +1,6 @@
 const COLORS={done:'#38c995',progress:'#d2b46d',pending:'#60aee8',risk:'#e5786d',study:'#9c89d9',out:'#637872',unclassified:'#8b9a96'};
 const STATUS={done:'منجز ومقبول تشغيليًا',progress:'قيد التنفيذ',pending:'بانتظار إجراء',risk:'متعثر أو معرّض للخطر'};
-let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',search:''},raf=[];
+let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',leader:'all',search:''},raf=[];
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ar=n=>Number(n||0).toLocaleString('ar-SA');
@@ -20,13 +20,16 @@ function fillFilters(){
   $('#weekFilter').innerHTML=DB.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
   $('#weekFilter').value=state.week;
   $('#serviceFilter').innerHTML='<option value="all">جميع المحافظ</option>'+DB.portfolios.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const leaders=[...new Set(DB.portfolios.flatMap(p=>String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim())).filter(x=>x&&x!=='قيد التحديد'&&x!=='لا يوجد'))].sort((a,b)=>a.localeCompare(b,'ar'));
+  $('#leaderFilter').innerHTML='<option value="all">جميع قادة المحافظ</option>'+leaders.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  $('#leaderFilter').value=state.leader;
   $('#lastUpdated').textContent=`آخر تحديث: ${DB.meta.lastUpdated}`;
 }
 
 function bind(){
-  ['weekFilter','serviceFilter','statusFilter','priorityFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
+  ['weekFilter','serviceFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
   $('#searchInput').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderServices()});
-  $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,service:'all',status:'all',priority:'all',search:''};fillFilters();$('#statusFilter').value='all';$('#priorityFilter').value='all';$('#searchInput').value='';render()});
+  $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,service:'all',status:'all',priority:'all',leader:'all',search:''};fillFilters();$('#statusFilter').value='all';$('#priorityFilter').value='all';$('#leaderFilter').value='all';$('#searchInput').value='';render()});
   $('#presentationBtn').addEventListener('click',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
   $('#dataDialog .close').addEventListener('click',()=>$('#dataDialog').close());
@@ -42,7 +45,7 @@ function bind(){
 
 function week(){return DB.weeks.find(w=>w.id===state.week)}
 function relevant(){return DB.portfolios.filter(p=>p.weeks.includes(state.week))}
-function filtered(){return relevant().filter(p=>(state.service==='all'||p.id===state.service)&&(state.status==='all'||p.status===state.status)&&(state.priority==='all'||p.priority===state.priority)&&(!state.search||JSON.stringify(p).toLowerCase().includes(state.search)))}
+function filtered(){return relevant().filter(p=>{const leaders=String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim());return(state.service==='all'||p.id===state.service)&&(state.status==='all'||p.status===state.status)&&(state.priority==='all'||p.priority===state.priority)&&(state.leader==='all'||leaders.includes(state.leader))&&(!state.search||JSON.stringify(p).toLowerCase().includes(state.search))})}
 
 function render(){
   const w=week(); $('#weekPeriod').textContent=w.period; $('#weekDataNote').textContent=w.quality;
