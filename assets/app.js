@@ -7,7 +7,7 @@ const ar=n=>Number(n||0).toLocaleString('ar-SA');
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
 async function boot(){
-  try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json'].map(x=>fetch(x).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));[DB,DETAILS]=loaded;DB.portfolios.push(...loaded[2])}
+  try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); render(); reveal();
 }
