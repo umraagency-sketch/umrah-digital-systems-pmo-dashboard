@@ -184,12 +184,12 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-portfolio .risk-table article{font-size:8.75pt!important;color:#111!important}
 }
 
-.boc-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.boc-strip span{padding:8px 10px;border:1px solid var(--line);border-radius:9px;color:#dbe5e1;font-size:.72rem}.boc-strip b{display:block;color:var(--gold);font-size:.62rem}
+.poc-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.poc-strip span{padding:8px 10px;border:1px solid var(--line);border-radius:9px;color:#dbe5e1;font-size:.72rem}.poc-strip b{display:block;color:var(--gold);font-size:.62rem}
 @media print{
-  body.print-weekly .weekly-portfolio-grid .boc-strip{gap:1mm!important;margin:1.5mm 0!important}
-  body.print-weekly .weekly-portfolio-grid .boc-strip span{padding:1mm!important;border-color:#d7e2de!important;color:#111!important;font-size:7.5pt!important}
-  body.print-weekly .weekly-portfolio-grid .boc-strip b{color:#0d6957!important;font-size:7pt!important}
-  body.print-portfolio .boc-strip{gap:2mm!important;margin:2mm 0 3mm!important}
-  body.print-portfolio .boc-strip span{padding:2mm!important;border-color:#d6e2dd!important;background:#f7faf8!important;color:#111!important;font-size:9pt!important}
-  body.print-portfolio .boc-strip b{color:#0d6957!important;font-size:8pt!important}
+  body.print-weekly .weekly-portfolio-grid .poc-strip{gap:1mm!important;margin:1.5mm 0!important}
+  body.print-weekly .weekly-portfolio-grid .poc-strip span{padding:1mm!important;border-color:#d7e2de!important;color:#111!important;font-size:7.5pt!important}
+  body.print-weekly .weekly-portfolio-grid .poc-strip b{color:#0d6957!important;font-size:7pt!important}
+  body.print-portfolio .poc-strip{gap:2mm!important;margin:2mm 0 3mm!important}
+  body.print-portfolio .poc-strip span{padding:2mm!important;border-color:#d6e2dd!important;background:#f7faf8!important;color:#111!important;font-size:9pt!important}
+  body.print-portfolio .poc-strip b{color:#0d6957!important;font-size:8pt!important}
 }

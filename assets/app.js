@@ -4,8 +4,8 @@ let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',search:'
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ar=n=>Number(n||0).toLocaleString('ar-SA');
-const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const bocMarkup=p=>`<div class="boc-strip"><span><b>BOC · وكالة العمرة</b>${esc(p.boc?.agency||'قيد التحديد')}</span><span><b>BOC · مركز المعلومات</b>${esc(p.boc?.center||'قيد التحديد')}</span></div>`;
+const esc=s=>String(s??'').replace(/\bBOC\b/g,'POC').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const pocMarkup=p=>{const x=p.poc||p.boc;return `<div class="poc-strip"><span><b>POC · وكالة العمرة</b>${esc(x?.agency||'قيد التحديد')}</span><span><b>POC · مركز المعلومات</b>${esc(x?.center||'قيد التحديد')}</span></div>`};
 
 async function boot(){
   try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
@@ -90,7 +90,7 @@ function renderServices(){
   const ps=filtered(); $('#resultsCount').textContent=`عرض ${ar(ps.length)} من ${ar(relevant().length)} محفظة نشطة في الفترة`;
   $('#servicesGrid').innerHTML=ps.length?ps.map((p,i)=>`<article class="service-card ${p.status==='risk'||p.priority==='critical'?'needs-attention':''}" style="--status:${COLORS[p.status]};--progress:${p.progress}%;animation-delay:${i*55}ms">
     <div class="card-top"><div><span class="service-code">${p.code} · ${esc(p.type)}</span><h3>${esc(p.name)}</h3></div><span class="badge">${STATUS[p.status]}</span></div>
-    <p class="service-meta">${esc(p.owner)} · نطاق المحفظة تحت المطابقة البندية</p>${bocMarkup(p)}
+    <p class="service-meta">${esc(p.owner)} · نطاق المحفظة تحت المطابقة البندية</p>${pocMarkup(p)}
     <div class="progress-line"><i></i></div><div class="progress-label"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>
     <ul><li><b>آخر تحديث:</b> ${esc(p.lastUpdate)}</li><li><b>المخاطر:</b> ${esc(p.risk)}</li></ul>
     <div class="next-action"><span>الإجراء القادم</span>${esc(p.next)}</div>
@@ -118,7 +118,7 @@ function openWeeklyReport(){
     </section>
     <section class="weekly-page weekly-page-portfolios">
       <header class="weekly-section-head"><div><span>${esc(w.label)}</span><h2>المحافظ التي شهدت نشاطًا</h2></div><b>${ar(ps.length)} محافظ</b></header>
-      <div class="weekly-portfolio-grid">${ps.map(p=>`<article style="--weekly-status:${COLORS[p.status]}"><div class="weekly-card-head"><div><small>${esc(p.code)} · ${esc(p.type)}</small><h3>${esc(p.name)}</h3></div><span>${STATUS[p.status]}</span></div><div class="weekly-card-progress"><i style="width:${p.progress}%"></i></div><div class="weekly-card-score"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>${bocMarkup(p)}<p><strong>آخر تحديث:</strong> ${esc(p.lastUpdate)}</p><p><strong>الإجراء القادم:</strong> ${esc(p.next)}</p></article>`).join('')}</div>
+      <div class="weekly-portfolio-grid">${ps.map(p=>`<article style="--weekly-status:${COLORS[p.status]}"><div class="weekly-card-head"><div><small>${esc(p.code)} · ${esc(p.type)}</small><h3>${esc(p.name)}</h3></div><span>${STATUS[p.status]}</span></div><div class="weekly-card-progress"><i style="width:${p.progress}%"></i></div><div class="weekly-card-score"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>${pocMarkup(p)}<p><strong>آخر تحديث:</strong> ${esc(p.lastUpdate)}</p><p><strong>الإجراء القادم:</strong> ${esc(p.next)}</p></article>`).join('')}</div>
       <footer class="weekly-report-foot"><span>المصدر: قاعدة بيانات المتابعة الأسبوعية والمراسلات الموثقة</span><span>${esc(DB.meta.lastUpdated)}</span></footer>
     </section>`;
   $('#weeklyReportDialog').showModal();
@@ -130,7 +130,7 @@ function openPortfolio(id){
   const raci=d?.raci||buildRaci(d?.governance,p);
   const stats=['done','progress','pending','risk'].map(s=>({s,n:items.filter(x=>x.status===s).length}));
   const e=d?.evm,sv=e?e.earned-e.planned:null,spi=e&&e.planned?e.earned/e.planned:null,cv=e?.actualCost!=null?e.earned-e.actualCost:null,cpi=e?.actualCost?e.earned/e.actualCost:null;
-  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>${bocMarkup(p)}
+  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>${pocMarkup(p)}
     <div class="detail-stats">${stats.map(x=>`<div><b>${ar(x.n)}</b><span>${STATUS[x.s]}</span></div>`).join('')}</div>
     ${d?.tracks?`<section class="portfolio-tracks">${d.tracks.map(x=>`<article><div><span>مسار تنفيذي</span><h3>${esc(x.name)}</h3></div><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><p><b>الحالة الحالية:</b> ${esc(x.current)}</p><p><b>الإجراء التالي:</b> ${esc(x.next)}</p><small>${esc(x.owner)}</small></article>`).join('')}</section>`:''}
     ${d?.kpis?`<section class="portfolio-kpis">${d.kpis.map(x=>`<article class="${x.attention?'attention':''}"><b>${esc(x.value)}</b><span>${esc(x.label)}</span><small>${esc(x.note)}</small></article>`).join('')}</section>`:''}
