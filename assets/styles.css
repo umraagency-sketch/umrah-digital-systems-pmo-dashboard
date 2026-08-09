@@ -69,6 +69,18 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-portfolio .milestone,body.print-portfolio .work-table article,body.print-portfolio .raci-table article,body.print-portfolio .risk-table article{break-inside:avoid!important}
 }
 
+.service-catalog{display:grid;grid-template-columns:1.4fr .6fr;gap:12px;margin:18px 0 24px}.service-catalog>article{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(56,201,149,.045)}.service-catalog>article.missing{border-color:rgba(229,120,109,.45);background:rgba(229,120,109,.055)}.service-catalog header{display:flex;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}.service-catalog header span{color:var(--green)}.service-catalog .missing header span{color:var(--red)}.service-catalog header b{color:var(--gold)}.service-catalog ol{columns:2;column-gap:28px;margin:12px 0 0;padding-right:24px}.service-catalog li{break-inside:avoid;padding:4px 0;color:#dce6e2;font-size:.78rem}.service-catalog .missing ol{columns:1}.service-catalog p{padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:.74rem}
+@media print{
+  body.print-portfolio .service-catalog{gap:3mm!important;margin:3mm 0!important;break-inside:avoid!important}
+  body.print-portfolio .service-catalog>article{padding:3mm!important;border-color:#d6e2dd!important;background:#f6faf8!important}
+  body.print-portfolio .service-catalog>article.missing{border-color:#edc4bf!important;background:#fff7f6!important}
+  body.print-portfolio .service-catalog header span{color:#0d6957!important}
+  body.print-portfolio .service-catalog .missing header span{color:#b8473e!important}
+  body.print-portfolio .service-catalog ol{margin:2mm 0 0!important;padding-right:5mm!important;column-gap:5mm!important}
+  body.print-portfolio .service-catalog li{padding:.6mm 0!important;color:#111!important;font-size:8.5pt!important}
+  body.print-portfolio .service-catalog p{color:#333!important;font-size:8pt!important}
+}
+
 @media print{
   body.print-weekly{background:#fff!important;color:#14231e!important;font-family:"Sakkal Majalla","Traditional Arabic",serif!important;font-size:10.5pt!important;line-height:1.38!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body.print-weekly>main,body.print-weekly>.ambient,body.print-weekly>.topbar,body.print-weekly>#dataDialog,body.print-weekly>#portfolioDialog{display:none!important}
