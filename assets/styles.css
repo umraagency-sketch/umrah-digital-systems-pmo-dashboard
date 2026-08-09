@@ -197,6 +197,13 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-weekly .weekly-portfolio-grid.dense .weekly-card-head>span{font-size:6.75pt!important}
   body.print-weekly .weekly-portfolio-grid.dense .poc-strip{grid-template-columns:1fr!important}
   body.print-weekly .weekly-portfolio-grid.dense p{font-size:7.25pt!important;line-height:1.2!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense>article{height:62mm!important;min-height:0!important;overflow:hidden!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense .weekly-card-head h3{font-size:9pt!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense .poc-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:.7mm!important;margin:1mm 0!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense .poc-strip span{padding:.7mm!important;font-size:6.5pt!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense .poc-strip b{font-size:6.25pt!important}
+  body.print-weekly .weekly-portfolio-grid.ultra-dense p{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;overflow:hidden!important;font-size:7.25pt!important}
   body.print-portfolio .poc-strip{gap:2mm!important;margin:2mm 0 3mm!important}
   body.print-portfolio .poc-strip span{padding:2mm!important;border-color:#d6e2dd!important;background:#f7faf8!important;color:#111!important;font-size:9pt!important}
   body.print-portfolio .poc-strip b{color:#0d6957!important;font-size:8pt!important}
