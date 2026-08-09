@@ -104,3 +104,34 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-portfolio .risk-section{margin:3mm 0!important;padding:3mm!important}
   body.print-portfolio .risk-table article{padding:2mm 1.5mm!important;line-height:1.3!important}
 }
+
+/* Larger, higher-contrast executive print typography. */
+@page{size:A4 portrait;margin:6mm}
+@media print{
+  body.print-portfolio{font-size:12pt!important;line-height:1.42!important}
+  body.print-portfolio #portfolioDetail{width:198mm!important}
+  body.print-portfolio .detail-lead{font-size:10.75pt!important;color:#17241f!important}
+  body.print-portfolio .detail-stats span{font-size:9.75pt!important;color:#17241f!important}
+  body.print-portfolio .portfolio-kpis span{font-size:10pt!important;color:#17241f!important}
+  body.print-portfolio .portfolio-kpis small{font-size:9pt!important;color:#34443e!important}
+  body.print-portfolio .portfolio-tracks article p,
+  body.print-portfolio .portfolio-tracks article small{font-size:9.5pt!important;color:#17241f!important}
+  body.print-portfolio .milestone time{font-size:9pt!important}
+  body.print-portfolio .milestone b{font-size:10.5pt!important;color:#111!important}
+  body.print-portfolio .milestone p{font-size:9.5pt!important;color:#17241f!important}
+  body.print-portfolio .milestone small{font-size:8.75pt!important;color:#34443e!important}
+  body.print-portfolio .decision-strip span{font-size:9.5pt!important;color:#17241f!important}
+  body.print-portfolio .decision-strip{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;column-gap:5mm!important}
+  body.print-portfolio .decision-strip h3{grid-column:1/-1!important;margin-bottom:1mm!important}
+  body.print-portfolio .work-table article,
+  body.print-portfolio .work-table article b,
+  body.print-portfolio .work-table article p,
+  body.print-portfolio .work-table article strong{color:#111!important}
+  body.print-portfolio .work-table article b{font-size:10.25pt!important}
+  body.print-portfolio .work-table p{font-size:9.25pt!important;line-height:1.34!important}
+  body.print-portfolio .benefit b{font-size:10.5pt!important;color:#111!important}
+  body.print-portfolio .benefit span{font-size:9.5pt!important;color:#17241f!important}
+  body.print-portfolio .benefit small{font-size:8.75pt!important;color:#34443e!important}
+  body.print-portfolio .risk-head{font-size:9pt!important}
+  body.print-portfolio .risk-table article{font-size:8.75pt!important;color:#111!important}
+}
