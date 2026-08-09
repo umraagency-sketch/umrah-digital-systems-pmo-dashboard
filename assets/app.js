@@ -5,7 +5,7 @@ let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',search:'
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ar=n=>Number(n||0).toLocaleString('ar-SA');
 const esc=s=>String(s??'').replace(/\bBOC\b/g,'POC').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const pocMarkup=p=>{const x=p.poc||p.boc;return `<div class="poc-strip"><span><b>POC · وكالة العمرة</b>${esc(x?.agency||'قيد التحديد')}</span><span><b>POC · مركز المعلومات</b>${esc(x?.center||'قيد التحديد')}</span></div>`};
+const pocMarkup=p=>{const x=p.poc||p.boc,items=[['POC · وكالة العمرة',x?.agency||'قيد التحديد']];if(x?.digital)items.push(['POC · وكالة التحول الرقمي',x.digital]);else items.push(['POC · مركز المعلومات',x?.center||'قيد التحديد']);if(x?.productOwner)items.push(['مالك المنتج',x.productOwner]);return `<div class="poc-strip">${items.map(([l,v])=>`<span><b>${l}</b>${esc(v)}</span>`).join('')}</div>`};
 
 async function boot(){
   try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
@@ -118,7 +118,7 @@ function openWeeklyReport(){
     </section>
     <section class="weekly-page weekly-page-portfolios">
       <header class="weekly-section-head"><div><span>${esc(w.label)}</span><h2>المحافظ التي شهدت نشاطًا</h2></div><b>${ar(ps.length)} محافظ</b></header>
-      <div class="weekly-portfolio-grid">${ps.map(p=>`<article style="--weekly-status:${COLORS[p.status]}"><div class="weekly-card-head"><div><small>${esc(p.code)} · ${esc(p.type)}</small><h3>${esc(p.name)}</h3></div><span>${STATUS[p.status]}</span></div><div class="weekly-card-progress"><i style="width:${p.progress}%"></i></div><div class="weekly-card-score"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>${pocMarkup(p)}<p><strong>آخر تحديث:</strong> ${esc(p.lastUpdate)}</p><p><strong>الإجراء القادم:</strong> ${esc(p.next)}</p></article>`).join('')}</div>
+      <div class="weekly-portfolio-grid ${ps.length>9?'dense':''}">${ps.map(p=>`<article style="--weekly-status:${COLORS[p.status]}"><div class="weekly-card-head"><div><small>${esc(p.code)} · ${esc(p.type)}</small><h3>${esc(p.name)}</h3></div><span>${STATUS[p.status]}</span></div><div class="weekly-card-progress"><i style="width:${p.progress}%"></i></div><div class="weekly-card-score"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>${pocMarkup(p)}<p><strong>آخر تحديث:</strong> ${esc(p.lastUpdate)}</p><p><strong>الإجراء القادم:</strong> ${esc(p.next)}</p></article>`).join('')}</div>
       <footer class="weekly-report-foot"><span>المصدر: قاعدة بيانات المتابعة الأسبوعية والمراسلات الموثقة</span><span>${esc(DB.meta.lastUpdated)}</span></footer>
     </section>`;
   $('#weeklyReportDialog').showModal();

@@ -101,6 +101,7 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-weekly .weekly-attention article{padding:2mm!important;border-color:#d7e2de!important;break-inside:avoid!important}
   body.print-weekly .weekly-attention span{color:#bb4e45!important}
   body.print-weekly .weekly-page-portfolios{padding-top:2mm!important}
+  body.print-weekly .weekly-page-portfolios{min-height:0!important;overflow:visible!important}
   body.print-weekly .weekly-section-head{margin-bottom:3mm!important;padding-bottom:3mm!important;border-bottom:1px solid #0d6957!important}
   body.print-weekly .weekly-section-head h2{font-size:19pt!important;color:#10241f!important}
   body.print-weekly .weekly-section-head>b{color:#0d6957!important}
@@ -189,6 +190,13 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-weekly .weekly-portfolio-grid .poc-strip{gap:1mm!important;margin:1.5mm 0!important}
   body.print-weekly .weekly-portfolio-grid .poc-strip span{padding:1mm!important;border-color:#d7e2de!important;color:#111!important;font-size:7.5pt!important}
   body.print-weekly .weekly-portfolio-grid .poc-strip b{color:#0d6957!important;font-size:7pt!important}
+  body.print-weekly .weekly-portfolio-grid.dense{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2mm!important}
+  body.print-weekly .weekly-portfolio-grid.dense>article{min-height:100mm!important;padding:2.5mm!important}
+  body.print-weekly .weekly-portfolio-grid.dense .weekly-card-head{display:block!important}
+  body.print-weekly .weekly-portfolio-grid.dense .weekly-card-head h3{font-size:9pt!important}
+  body.print-weekly .weekly-portfolio-grid.dense .weekly-card-head>span{font-size:6.75pt!important}
+  body.print-weekly .weekly-portfolio-grid.dense .poc-strip{grid-template-columns:1fr!important}
+  body.print-weekly .weekly-portfolio-grid.dense p{font-size:7.25pt!important;line-height:1.2!important}
   body.print-portfolio .poc-strip{gap:2mm!important;margin:2mm 0 3mm!important}
   body.print-portfolio .poc-strip span{padding:2mm!important;border-color:#d6e2dd!important;background:#f7faf8!important;color:#111!important;font-size:9pt!important}
   body.print-portfolio .poc-strip b{color:#0d6957!important;font-size:8pt!important}
