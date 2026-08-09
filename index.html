@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071916">
+  <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
+  <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/ministry-logo.png" alt="وزارة الحج والعمرة">
+      <span></span>
+      <div><b>إدارة متابعة الأنظمة الرقمية</b><small>وكالة العمرة · غرفة التحكم التنفيذية</small></div>
+    </div>
+    <div class="top-actions"><span class="live"><i></i> بيانات محدثة</span><button id="presentationBtn" class="icon-btn" title="وضع العرض">⛶</button></div>
+  </header>
+
+  <main>
+    <section class="hero reveal">
+      <div>
+        <p class="eyebrow">المشهد التنفيذي · موسم العمرة 1448هـ</p>
+        <h1>من المتطلب إلى الأثر.<br><em>صورة أسبوعية واحدة.</em></h1>
+        <p class="hero-copy">منصة متابعة موحّدة تربط المتطلبات الرقمية والمبادرات بالإنجازات والمراسلات والإجراء التالي—مع تتبع زمني قابل للرجوع.</p>
+      </div>
+      <div class="hero-week">
+        <label for="weekFilter">الفترة المعروضة</label>
+        <select id="weekFilter" aria-label="اختيار الأسبوع"></select>
+        <strong id="weekPeriod"></strong>
+        <small id="weekDataNote"></small>
+      </div>
+    </section>
+
+    <section class="filter-bar reveal" aria-label="مرشحات البيانات">
+      <div><label for="serviceFilter">الخدمة</label><select id="serviceFilter"><option value="all">جميع الخدمات</option></select></div>
+      <div><label for="statusFilter">الحالة</label><select id="statusFilter"><option value="all">جميع الحالات</option><option value="done">منجز</option><option value="progress">قيد العمل</option><option value="pending">بانتظار إجراء</option><option value="risk">متعثّر / خطر</option></select></div>
+      <div><label for="priorityFilter">الأولوية</label><select id="priorityFilter"><option value="all">كل الأولويات</option><option value="critical">حرجة</option><option value="high">عالية</option><option value="normal">اعتيادية</option></select></div>
+      <div class="search"><label for="searchInput">بحث</label><input id="searchInput" type="search" placeholder="ابحث عن متطلب أو خدمة…"></div>
+      <button id="resetFilters" class="ghost-btn">إعادة الضبط</button>
+    </section>
+
+    <section class="metric-grid reveal" id="metrics"></section>
+
+    <section class="executive-grid reveal">
+      <article class="glass chart-card">
+        <header><div><p class="eyebrow">مؤشر المحفظة</p><h2>وضع المتطلبات</h2></div><span class="source-chip">خط الأساس + تحديث الزملاء</span></header>
+        <div class="donut-wrap"><canvas id="donutChart" width="260" height="260" aria-label="توزيع حالات المتطلبات"></canvas><div class="donut-center"><b id="donutTotal">112</b><span>متطلباً</span></div></div>
+        <div id="statusLegend" class="legend"></div>
+      </article>
+      <article class="glass chart-card wide">
+        <header><div><p class="eyebrow">نبض التنفيذ</p><h2>النشاط عبر الأسابيع</h2></div><span id="activityTotal" class="source-chip"></span></header>
+        <canvas id="trendChart" height="220" aria-label="منحنى النشاط الأسبوعي"></canvas>
+        <div class="chart-key"><span><i class="green"></i> مخرجات</span><span><i class="gold"></i> مراسلات ومتابعات</span></div>
+      </article>
+      <article class="glass attention-card">
+        <header><div><p class="eyebrow">رادار القيادة</p><h2>ما يحتاج قراراً</h2></div></header>
+        <div id="decisionList"></div>
+      </article>
+    </section>
+
+    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2>كل موضوع، أين وصل؟</h2></div><p id="resultsCount"></p></section>
+    <section id="servicesGrid" class="services-grid"></section>
+
+    <section class="split-grid reveal">
+      <article class="glass">
+        <header><div><p class="eyebrow">إنجاز الأسبوع</p><h2>خط زمني موثّق</h2></div></header>
+        <div id="timeline" class="timeline"></div>
+      </article>
+      <article class="glass">
+        <header><div><p class="eyebrow">سجل المتطلبات</p><h2>تفسير الرقم 112</h2></div></header>
+        <div id="baselineBreakdown" class="baseline"></div>
+        <div class="data-callout"><b>قاعدة الحوكمة</b><p>لا يُعد النشاط إنجازاً نهائياً إلا بوجود مخرج قابل للإثبات. أما الرقم 112 فهو إجمالي المحفظة المبلغ عنه، ويظل الجزء الجديد تحت المطابقة حتى إدراجه بنداً بنداً.</p></div>
+      </article>
+    </section>
+
+    <footer><span>إدارة متابعة الأنظمة الرقمية · وكالة العمرة</span><span id="lastUpdated"></span><button id="dataBtn">منهجية البيانات</button></footer>
+  </main>
+
+  <dialog id="dataDialog">
+    <button class="close" aria-label="إغلاق">×</button>
+    <p class="eyebrow">منهجية البيانات</p><h2>كيف تُقرأ اللوحة؟</h2>
+    <p>تعتمد اللوحة على ملف بيانات JSON مُنسّق حسب الأسبوع والخدمة. إجمالي 112 هو آخر رقم أكدته إفادة الزملاء بتاريخ 9 أغسطس 2026. ويعرض التفصيل 74 متطلباً موثقاً في ملف خط الأساس V12.03، و38 متطلباً جديداً تحت المطابقة البندية؛ لذلك لا نوزّع المتطلبات الجديدة على الحالات قبل استلام قائمتها المعتمدة.</p>
+    <p>المبادرات التشغيلية تُعرض داخل الخدمات، لكنها لا تُضاف تلقائياً إلى إجمالي المتطلبات التقنية منعاً للازدواجية.</p>
+  </dialog>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
