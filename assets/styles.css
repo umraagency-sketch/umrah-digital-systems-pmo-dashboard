@@ -67,3 +67,40 @@ body,button,select,input,dialog{font-family:"Sakkal Majalla","Traditional Arabic
   body.print-portfolio section,body.print-portfolio article{page-break-inside:auto}
   body.print-portfolio .milestone,body.print-portfolio .work-table article,body.print-portfolio .raci-table article,body.print-portfolio .risk-table article{break-inside:avoid!important}
 }
+
+@media print{
+  body.print-portfolio,body.print-portfolio button,body.print-portfolio input,body.print-portfolio select{font-size:10.5pt!important;font-weight:700!important;line-height:1.46!important}
+  body.print-portfolio .detail-lead{font-size:9.25pt!important}
+  body.print-portfolio .detail-stats span{font-size:8.5pt!important}
+  body.print-portfolio .portfolio-kpis span{font-size:8.75pt!important}
+  body.print-portfolio .portfolio-kpis small{font-size:7.75pt!important;line-height:1.35!important}
+  body.print-portfolio .portfolio-tracks article p,body.print-portfolio .portfolio-tracks article small{font-size:8.25pt!important}
+  body.print-portfolio .milestone time{font-size:7.75pt!important}
+  body.print-portfolio .milestone b{font-size:9.25pt!important}
+  body.print-portfolio .milestone p{font-size:8.25pt!important;line-height:1.42!important}
+  body.print-portfolio .milestone small{font-size:7.5pt!important}
+  body.print-portfolio .governance-rail span{font-size:7.5pt!important}
+  body.print-portfolio .governance-rail b{font-size:9pt!important}
+  body.print-portfolio .governance-rail small{font-size:7.75pt!important}
+  body.print-portfolio .raci-head{font-size:8pt!important}
+  body.print-portfolio .raci-table article>div b{font-size:8.75pt!important}
+  body.print-portfolio .raci-table article>div small,body.print-portfolio .raci-table article p{font-size:7.75pt!important;line-height:1.4!important}
+  body.print-portfolio .detail-grid{grid-template-columns:minmax(0,1.45fr) minmax(48mm,.55fr)!important;align-items:start!important;gap:4mm!important}
+  body.print-portfolio .work-table article b{font-size:8.75pt!important}
+  body.print-portfolio .work-table p{font-size:7.8pt!important;line-height:1.38!important}
+  body.print-portfolio .benefit b{font-size:9pt!important}
+  body.print-portfolio .benefit span{font-size:8pt!important}
+  body.print-portfolio .benefit small{font-size:7.5pt!important}
+  body.print-portfolio .risk-head{font-size:7.75pt!important}
+  body.print-portfolio .risk-table article{font-size:7.5pt!important;line-height:1.38!important}
+  body.print-portfolio .decision-strip{margin:3mm 0!important;padding:3mm!important}
+  body.print-portfolio .decision-strip span{padding:1mm 4mm!important;font-size:8pt!important}
+  body.print-portfolio .work-table{gap:1.2mm!important}
+  body.print-portfolio .work-table{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch!important}
+  body.print-portfolio .work-table article{padding:2mm 2.5mm!important}
+  body.print-portfolio .work-table p{margin:.5mm 0 0 2mm!important;line-height:1.28!important}
+  body.print-portfolio .benefit{padding:2mm 0!important}
+  body.print-portfolio .data-callout{margin-top:3mm!important;padding:3mm!important}
+  body.print-portfolio .risk-section{margin:3mm 0!important;padding:3mm!important}
+  body.print-portfolio .risk-table article{padding:2mm 1.5mm!important;line-height:1.3!important}
+}
