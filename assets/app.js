@@ -1,13 +1,13 @@
 const COLORS={done:'#38c995',progress:'#d2b46d',pending:'#60aee8',risk:'#e5786d',study:'#9c89d9',out:'#637872',unclassified:'#8b9a96'};
 const STATUS={done:'منجز / قبول تشغيلي',progress:'قيد العمل',pending:'بانتظار إجراء',risk:'متعثر / خطر'};
-let DB,state={week:'',service:'all',status:'all',priority:'all',search:''},raf=[];
+let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',search:''},raf=[];
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ar=n=>Number(n||0).toLocaleString('ar-SA');
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
 async function boot(){
-  try{DB=await fetch('data.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json()})}
+  try{[DB,DETAILS]=await Promise.all(['data.json','portfolio-details.json'].map(x=>fetch(x).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})))}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); render(); reveal();
 }
@@ -26,6 +26,8 @@ function bind(){
   $('#presentationBtn').addEventListener('click',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
   $('#dataDialog .close').addEventListener('click',()=>$('#dataDialog').close());
+  $('#portfolioDialog .close').addEventListener('click',()=>$('#portfolioDialog').close());
+  $('#servicesGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-open]');if(btn)openPortfolio(btn.dataset.open)});
   addEventListener('resize',debounce(renderCharts,180));
 }
 
@@ -81,7 +83,19 @@ function renderServices(){
     <ul><li><b>آخر تحديث:</b> ${esc(p.lastUpdate)}</li><li><b>المخاطر:</b> ${esc(p.risk)}</li></ul>
     <div class="next-action"><span>الإجراء القادم</span>${esc(p.next)}</div>
     <div class="next-action" style="margin-top:8px"><span>الدعم المطلوب</span>${esc(p.support)}</div>
+    <button class="portfolio-open" data-open="${p.id}">فتح غرفة المتابعة ←</button>
   </article>`).join(''):'<div class="empty">لا توجد محافظ تطابق المرشحات الحالية.</div>';
+}
+
+function openPortfolio(id){
+  const p=DB.portfolios.find(x=>x.id===id),d=DETAILS[id],items=d?.workItems||p.achieved.map((x,i)=>({id:`${p.code}-${i+1}`,title:x,status:'done',owner:p.owner,evidence:'تحديث المحفظة',next:p.next,support:p.support}));
+  const stats=['done','progress','pending','risk'].map(s=>({s,n:items.filter(x=>x.status===s).length}));
+  $('#portfolioDetail').innerHTML=`<p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>
+    <div class="detail-stats">${stats.map(x=>`<div><b>${ar(x.n)}</b><span>${STATUS[x.s]}</span></div>`).join('')}</div>
+    ${d?.decisions?`<section class="decision-strip"><h3>القرارات والتوجهات</h3>${d.decisions.map(x=>`<span>${esc(x)}</span>`).join('')}</section>`:''}
+    <div class="detail-grid"><section><h3>سجل الأعمال</h3><div class="work-table">${items.map(x=>`<article><div><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><b>${esc(x.id)} · ${esc(x.title)}</b></div><p><strong>المالك:</strong> ${esc(x.owner)}</p><p><strong>الدليل:</strong> ${esc(x.evidence)}</p><p><strong>التالي:</strong> ${esc(x.next)}</p><p><strong>الدعم:</strong> ${esc(x.support)}</p></article>`).join('')}</div></section>
+    <aside><h3>أصحاب المصلحة</h3>${(d?.stakeholders||[{name:p.owner,role:'ملكية وتنفيذ المحفظة',engagement:'متابعة أسبوعية'}]).map(x=>`<div class="stakeholder"><b>${esc(x.name)}</b><span>${esc(x.role)}</span><small>${esc(x.engagement)}</small></div>`).join('')}<div class="data-callout"><b>قاعدة الإغلاق</b><p>${esc(DETAILS.framework.closureRule)}</p></div></aside></div>`;
+  $('#portfolioDialog').showModal();
 }
 
 function renderTimeline(){$('#timeline').innerHTML=week().timeline.map(t=>`<div class="timeline-item"><time>${esc(t.date)}</time><b>${esc(t.title)}</b><p>${esc(t.detail)}</p></div>`).join('')}
