@@ -1,6 +1,6 @@
 const COLORS={done:'#38c995',progress:'#d2b46d',pending:'#60aee8',risk:'#e5786d',study:'#9c89d9',out:'#637872',unclassified:'#8b9a96'};
 const STATUS={done:'منجز ومقبول تشغيليًا',progress:'قيد التنفيذ',pending:'بانتظار إجراء',risk:'متعثر أو معرّض للخطر'};
-let DB,DETAILS,state={week:'',scope:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'portfolios'},raf=[];
+let DB,DETAILS,ARCH,state={week:'',scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture'},raf=[];
 const ORDER_KEY='umrah-pmo-portfolio-order-v1',WORK_KEY='umrah-pmo-work-state-v1';
 const readLocal=(key,fallback={})=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
 const writeLocal=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
@@ -12,7 +12,7 @@ const pocMarkup=p=>{const x=p.poc||p.boc,items=[['POC · وكالة العمرة
 const evidenceLinks=x=>(x.evidenceLinks||[]).map(link=>{const local=['localhost','127.0.0.1'].includes(location.hostname);return link.restricted&&!local?`<button class="evidence-link restricted" data-evidence="دليل مقيّد للاستخدام الداخلي. يتطلب فتحه تسجيل دخول وصلاحية وصول معتمدة.">${esc(link.label)} · مقيّد</button>`:`<a class="evidence-link" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.label)}</a>`}).join('');
 
 async function boot(){
-  try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
+  try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json','architecture.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2]);ARCH=loaded[4];DB.portfolios.forEach(p=>p.architecture=ARCH.items[p.id]||{})}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
   const savedOrder=readLocal(ORDER_KEY,[]);if(savedOrder.length)DB.portfolios.sort((a,b)=>{const ai=savedOrder.indexOf(a.id),bi=savedOrder.indexOf(b.id);return(ai<0?999:ai)-(bi<0?999:bi)});
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); syncViewControls(); render(); reveal();
@@ -25,6 +25,7 @@ function fillFilters(){
   $('#weekFilter').innerHTML=DB.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
   $('#weekFilter').value=state.week;
   $('#serviceFilter').innerHTML='<option value="all">جميع المحافظ</option>'+DB.portfolios.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  $('#pillarFilter').innerHTML='<option value="all">جميع الركائز</option>'+ARCH.pillars.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   const leaders=[...new Set(DB.portfolios.flatMap(p=>String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim())).filter(x=>x&&x!=='قيد التحديد'&&x!=='لا يوجد'))].sort((a,b)=>a.localeCompare(b,'ar'));
   $('#leaderFilter').innerHTML='<option value="all">جميع قادة المحافظ</option>'+leaders.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('#leaderFilter').value=state.leader;
@@ -32,9 +33,9 @@ function fillFilters(){
 }
 
 function bind(){
-  ['weekFilter','scopeFilter','serviceFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
+  ['weekFilter','scopeFilter','pillarFilter','natureFilter','serviceFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
   $('#searchInput').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderServices()});
-  $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,scope:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'portfolios'};fillFilters();$('#scopeFilter').value='all';$('#statusFilter').value='all';$('#priorityFilter').value='all';$('#leaderFilter').value='all';$('#searchInput').value='';document.body.classList.remove('priority-edit');syncViewControls();render()});
+  $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture'};fillFilters();['scopeFilter','pillarFilter','natureFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).value='all');$('#searchInput').value='';document.body.classList.remove('priority-edit');syncViewControls();render()});
   $('#presentationBtn').addEventListener('click',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
   $('#dataDialog .close').addEventListener('click',()=>$('#dataDialog').close());
@@ -54,8 +55,8 @@ function bind(){
 function week(){return DB.weeks.find(w=>w.id===state.week)}
 function relevant(){return DB.portfolios.filter(p=>p.weeks.includes(state.week))}
 function displayed(){return state.scope==='active'?relevant():DB.portfolios}
-function filtered(){return displayed().filter(p=>{const leaders=String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim());return(state.service==='all'||p.id===state.service)&&(state.status==='all'||p.status===state.status)&&(state.priority==='all'||p.priority===state.priority)&&(state.leader==='all'||leaders.includes(state.leader))&&(!state.search||JSON.stringify({...p,details:DETAILS[p.id]}).toLowerCase().includes(state.search))})}
-function syncViewControls(){$$('.view-toggle [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view));$('#portfolioViewTitle').textContent=state.view==='actions'?'سجل الأعمال القادمة حسب الأولوية':'الحالة التنفيذية لكل محفظة';$('#priorityModeBtn').style.display=state.view==='portfolios'?'':'none'}
+function filtered(){return displayed().filter(p=>{const leaders=String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim()),a=p.architecture||{},natureMatch=state.nature==='all'||(state.nature==='sustainable'&&a.nature?.includes('مستدام'))||(state.nature==='temporary'&&a.nature?.includes('مؤقت'));return(state.pillar==='all'||a.pillar===state.pillar)&&natureMatch&&(state.service==='all'||p.id===state.service)&&(state.status==='all'||p.status===state.status)&&(state.priority==='all'||p.priority===state.priority)&&(state.leader==='all'||leaders.includes(state.leader))&&(!state.search||JSON.stringify({...p,details:DETAILS[p.id]}).toLowerCase().includes(state.search))})}
+function syncViewControls(){const titles={architecture:'الخريطة المعمارية للركائز',portfolios:'الحالة التنفيذية لكل محفظة',technical:'سجل مشروعات التطوير التقني',actions:'سجل الأعمال القادمة حسب الأولوية',operations:'التسليم والتشغيل بعد الإطلاق'};$$('.view-toggle [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view));$('#portfolioViewTitle').textContent=titles[state.view];$('#priorityModeBtn').style.display=state.view==='portfolios'?'':'none'}
 function activityFor(p){if(!p.weeks.includes(state.week))return null;const keys={visa:['التأشيرة','الدخول'],ota:['OTA','المنصات'],classification:['التصنيف'],catering:['الإعاشة'],traveler:['حقيبة'],flights:['الرحلات','الطيران'],'external-agents':['التأهيل','الوكلاء'],'tourism-integration':['السياحة','الفنادق','المرشدين'],'nusuk-app':['الإجهاد','نسك'],'marketing-incentives':['الحوافز']}[p.id]||[];const hit=week().timeline.find(t=>keys.some(k=>(t.title+' '+t.detail).includes(k)));return hit?`${hit.title}: ${hit.detail}`:'نشاط مسجل ضمن نطاق الأسبوع؛ تفاصيل الحدث بانتظار المطابقة البندية مع سجل المحفظة.'}
 
 function render(){
@@ -102,12 +103,16 @@ function renderDecisions(){$('#decisionList').innerHTML=DB.decisions.map(d=>`<di
 
 function renderServices(){
   const ps=filtered();
+  if(state.view==='architecture')return renderArchitecture(ps);
+  if(state.view==='technical')return renderTechnicalRegister(ps);
   if(state.view==='actions')return renderActionRegister(ps);
-  $('#servicesGrid').classList.remove('actions-view');
+  if(state.view==='operations')return renderOperationsRegister(ps);
+  $('#servicesGrid').classList.remove('actions-view','architecture-view');
   $('#resultsCount').textContent=`عرض ${ar(ps.length)} من ${ar(displayed().length)} محفظة · ${ar(relevant().length)} عليها نشاط في ${esc(week().label)}`;
   $('#servicesGrid').innerHTML=ps.length?ps.map((p,i)=>{const rank=DB.portfolios.indexOf(p)+1,activity=activityFor(p);return `<article class="service-card ${rank<=10?'top-priority ':''}${p.status==='risk'||p.priority==='critical'?'needs-attention':''}" draggable="${state.priorityEdit}" data-portfolio-id="${p.id}" style="--status:${COLORS[p.status]};--progress:${p.progress}%;animation-delay:${i*55}ms">
     <div class="card-top"><div><span class="service-code">${p.code} · ${esc(p.type)}</span><h3>${esc(p.name)}</h3></div><span class="badge">${STATUS[p.status]}</span></div>
     <div class="priority-rank"><b>${ar(rank)}</b><span>${rank<=10?'ضمن أعلى 10 أولويات':'ترتيب المحفظة'}</span></div>
+    <div class="architecture-chips"><span>${esc(ARCH.pillars.find(x=>x.id===p.architecture.pillar)?.name)}</span><span>${esc(p.architecture.elementType)}</span><span>${esc(p.architecture.nature)}</span></div>
     <div class="week-activity ${activity?'has-activity':'no-activity'}"><b>${activity?'نشاط موثق في الأسبوع':'لا يوجد نشاط موثق في الأسبوع'}</b><span>${activity?esc(activity):`المحفظة ظاهرة ضمن خيار «كل المحافظ»`}</span></div>
     <p class="service-meta">${esc(p.owner)} · نطاق المحفظة تحت المطابقة البندية</p>${pocMarkup(p)}
     <div class="progress-line"><i></i></div><div class="progress-label"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>
@@ -118,8 +123,28 @@ function renderServices(){
   </article>`}).join(''):'<div class="empty">لا توجد محافظ تطابق المرشحات الحالية.</div>';
 }
 
+function renderArchitecture(ps){
+  $('#servicesGrid').classList.remove('actions-view');$('#servicesGrid').classList.add('architecture-view');
+  const groups=ARCH.pillars.map(pillar=>({pillar,items:ps.filter(p=>p.architecture.pillar===pillar.id)})).filter(g=>g.items.length);
+  $('#resultsCount').textContent=`${ar(groups.length)} ركائز · ${ar(ps.length)} محفظة ومسار ومبادرة`;
+  $('#servicesGrid').innerHTML=groups.map(({pillar,items},i)=>`<article class="pillar-card" style="--pillar-index:${i}"><header><span>ركيزة مستدامة ${ar(i+1)}</span><h3>${esc(pillar.name)}</h3><p>${esc(pillar.description)}</p></header><div class="pillar-items">${items.map(p=>{const rank=DB.portfolios.indexOf(p)+1;return `<button data-open="${p.id}"><b>${ar(rank)} · ${esc(p.name)}</b><span>${esc(p.architecture.elementType)} · ${esc(p.architecture.nature)}</span><small>${esc(p.architecture.technicalState)} ← ${esc(p.architecture.operatingState)}</small></button>`}).join('')}</div></article>`).join('')||'<div class="empty">لا توجد ركائز تطابق المرشحات الحالية.</div>';
+}
+
+function renderTechnicalRegister(ps){
+  $('#servicesGrid').classList.add('actions-view');$('#servicesGrid').classList.remove('architecture-view');
+  $('#resultsCount').textContent=`${ar(ps.length)} مشروعًا أو محفظة تحت المتابعة التقنية`;
+  $('#servicesGrid').innerHTML=`<section class="closure-gates"><span>بوابات الإغلاق التقني</span>${ARCH.closureGates.map((g,i)=>`<b>${ar(i+1)} · ${esc(g)}</b>`).join('')}</section><div class="action-register-head technical"><span>الأولوية</span><span>المشروع التقني</span><span>حالة التنفيذ</span><span>بوابة الإغلاق والتسليم</span></div>${ps.map(p=>{const rank=DB.portfolios.indexOf(p)+1,a=p.architecture;return `<article class="action-register-row technical ${rank<=10?'top-action':''}"><div class="action-order"><b>${ar(rank)}</b><small>أولوية المحفظة</small></div><div><span class="service-code">${esc(ARCH.pillars.find(x=>x.id===a.pillar)?.name)} · ${esc(a.elementType)}</span><h3>${esc(p.name)}</h3><small>${esc(a.nature)}</small></div><div><span class="delivery-state">${esc(a.technicalState)}</span><p>${ar(p.progress)}% تقدم تقديري</p></div><div><p><strong>الإجراء:</strong> ${esc(p.next)}</p><small><strong>التسليم إلى:</strong> ${esc(a.operationsOwner)}</small><button class="portfolio-open" data-open="${p.id}">فتح تفاصيل المشروع ←</button></div></article>`}).join('')}`;
+}
+
+function renderOperationsRegister(ps){
+  $('#servicesGrid').classList.add('actions-view');$('#servicesGrid').classList.remove('architecture-view');
+  const rows=[...ps].sort((a,b)=>a.architecture.operatingState.localeCompare(b.architecture.operatingState,'ar'));
+  $('#resultsCount').textContent=`${ar(rows.length)} خدمة بحسب حالة التسليم والتشغيل`;
+  $('#servicesGrid').innerHTML=`<div class="action-register-head operations"><span>الأولوية</span><span>الخدمة</span><span>الحالة التشغيلية</span><span>مالك التشغيل</span></div>${rows.map(p=>{const rank=DB.portfolios.indexOf(p)+1,a=p.architecture;return `<article class="action-register-row operations ${a.operatingState.includes('مسلّم')?'handed-over':''}"><div class="action-order"><b>${ar(rank)}</b><small>${esc(a.nature)}</small></div><div><span class="service-code">${esc(a.elementType)}</span><h3>${esc(p.name)}</h3><small>التنفيذ التقني: ${esc(a.technicalState)}</small></div><div><span class="operating-state">${esc(a.operatingState)}</span></div><div><p>${esc(a.operationsOwner)}</p><small>${a.operatingState.includes('مسلّم')?'متابعة مؤشرات الأثر والتشغيل المستمر':'يتطلب استكمال بوابات الإغلاق والتسليم'}</small><button class="portfolio-open" data-open="${p.id}">فتح سجل التسليم ←</button></div></article>`}).join('')}`;
+}
+
 function renderActionRegister(ps){
-  $('#servicesGrid').classList.add('actions-view');
+  $('#servicesGrid').classList.add('actions-view');$('#servicesGrid').classList.remove('architecture-view');
   const rows=ps.flatMap(p=>{let items=workItemsFor(p,DETAILS[p.id]).filter(x=>x.status!=='done');if(!items.length&&p.next)items=[{id:`${p.code}-NEXT`,title:p.next,status:p.status==='risk'?'risk':'pending',owner:p.owner,next:p.next,support:p.support,evidence:'الإجراء القادم المسجل في المحفظة'}];return items.map((x,i)=>({p,x,portfolioRank:DB.portfolios.indexOf(p)+1,workRank:i+1}))});
   $('#resultsCount').textContent=`${ar(rows.length)} عملًا قادمًا · مرتبة حسب أولوية المحفظة ثم أولوية العمل`;
   $('#servicesGrid').innerHTML=rows.length?`<div class="action-register-head"><span>الأولوية</span><span>العمل القادم والمحفظة</span><span>المالك والحالة</span><span>الإجراء والدعم</span></div>${rows.map(({p,x,portfolioRank,workRank})=>`<article class="action-register-row ${portfolioRank<=10?'top-action':''}">
@@ -174,11 +199,12 @@ function openWeeklyReport(){
 
 function openPortfolio(id){
   const p=DB.portfolios.find(x=>x.id===id),d=DETAILS[id],items=workItemsFor(p,d);
+  const architecture=p.architecture||{},pillar=ARCH.pillars.find(x=>x.id===architecture.pillar);
   const milestones=d?.milestones||[...p.achieved.map((x,i)=>({date:`معلم ${ar(i+1)}`,title:x,status:'done',detail:'مخرج موثق ضمن سجل المحفظة.',evidence:'سجل تحديثات المحفظة'})),{date:'آخر تحديث',title:'الحالة التنفيذية الحالية',status:p.status,detail:p.lastUpdate,evidence:'آخر تحديث مسجل'}];
   const raci=d?.raci||buildRaci(d?.governance,p);
   const stats=['done','progress','pending','risk'].map(s=>({s,n:items.filter(x=>x.status===s).length}));
   const e=d?.evm,sv=e?e.earned-e.planned:null,spi=e&&e.planned?e.earned/e.planned:null,cv=e?.actualCost!=null?e.earned-e.actualCost:null,cpi=e?.actualCost?e.earned/e.actualCost:null;
-  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>${pocMarkup(p)}
+  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>${pocMarkup(p)}<section class="delivery-summary"><div><span>الركيزة</span><b>${esc(pillar?.name)}</b></div><div><span>نوع العنصر</span><b>${esc(architecture.elementType)}</b></div><div><span>الطبيعة</span><b>${esc(architecture.nature)}</b></div><div><span>التنفيذ التقني</span><b>${esc(architecture.technicalState)}</b></div><div><span>التشغيل والتسليم</span><b>${esc(architecture.operatingState)}</b></div><div><span>مالك التشغيل</span><b>${esc(architecture.operationsOwner)}</b></div></section>
     <div class="detail-stats">${stats.map(x=>`<div><b>${ar(x.n)}</b><span>${STATUS[x.s]}</span></div>`).join('')}</div>
     ${d?.tracks?`<section class="portfolio-tracks">${d.tracks.map(x=>`<article><div><span>مسار تنفيذي</span><h3>${esc(x.name)}</h3></div><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><p><b>الحالة الحالية:</b> ${esc(x.current)}</p><p><b>الإجراء التالي:</b> ${esc(x.next)}</p><small>${esc(x.owner)}</small></article>`).join('')}</section>`:''}
     ${d?.kpis?`<section class="portfolio-kpis">${d.kpis.map(x=>`<article class="${x.attention?'attention':''}"><b>${esc(x.value)}</b><span>${esc(x.label)}</span><small>${esc(x.note)}</small></article>`).join('')}</section>`:''}

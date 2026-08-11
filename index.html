@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071916">
   <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
   <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
-  <link rel="stylesheet" href="assets/styles.css?v=20260811-actions1">
+  <link rel="stylesheet" href="assets/styles.css?v=20260811-architecture1">
 </head>
 <body>
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -38,6 +38,8 @@
 
     <section class="filter-bar reveal" aria-label="مرشحات البيانات">
       <div><label for="scopeFilter">المحافظ المعروضة</label><select id="scopeFilter"><option value="all">كل المحافظ</option><option value="active">عليها نشاط في الأسبوع</option></select></div>
+      <div><label for="pillarFilter">الركيزة</label><select id="pillarFilter"><option value="all">جميع الركائز</option></select></div>
+      <div><label for="natureFilter">الطبيعة</label><select id="natureFilter"><option value="all">مستدامة ومؤقتة</option><option value="sustainable">مستدامة</option><option value="temporary">مؤقتة</option></select></div>
       <div><label for="serviceFilter">الخدمة</label><select id="serviceFilter"><option value="all">جميع الخدمات</option></select></div>
       <div><label for="statusFilter">الحالة</label><select id="statusFilter"><option value="all">جميع الحالات</option><option value="done">منجز</option><option value="progress">قيد التنفيذ</option><option value="pending">بانتظار إجراء</option><option value="risk">متعثّر أو معرّض للخطر</option></select></div>
       <div><label for="priorityFilter">الأولوية</label><select id="priorityFilter"><option value="all">جميع الأولويات</option><option value="critical">حرجة</option><option value="high">عالية</option><option value="normal">اعتيادية</option></select></div>
@@ -66,7 +68,7 @@
       </article>
     </section>
 
-    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2 id="portfolioViewTitle">الحالة التنفيذية لكل محفظة</h2></div><div class="portfolio-view-tools"><div class="view-toggle" role="group" aria-label="طريقة العرض"><button class="active" data-view="portfolios">عرض المحافظ</button><button data-view="actions">سجل الأعمال القادمة</button></div><p id="resultsCount"></p></div></section>
+    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2 id="portfolioViewTitle">الخريطة المعمارية للركائز</h2></div><div class="portfolio-view-tools"><div class="view-toggle" role="group" aria-label="طريقة العرض"><button class="active" data-view="architecture">الركائز</button><button data-view="portfolios">المحافظ</button><button data-view="technical">التطوير التقني</button><button data-view="actions">الأعمال القادمة</button><button data-view="operations">التسليم والتشغيل</button></div><p id="resultsCount"></p></div></section>
     <section id="servicesGrid" class="services-grid"></section>
 
     <section class="split-grid reveal">
@@ -99,6 +101,6 @@
     <div id="weeklyReport"></div>
   </dialog>
   <div id="weekToast" class="week-toast" role="status" aria-live="polite"></div>
-  <script src="assets/app.js?v=20260811-actions1" defer></script>
+  <script src="assets/app.js?v=20260811-architecture1" defer></script>
 </body>
 </html>

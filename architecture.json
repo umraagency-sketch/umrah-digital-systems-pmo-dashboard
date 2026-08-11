@@ -1,0 +1,29 @@
+{
+  "pillars": [
+    {"id":"direct","name":"العمرة المباشرة","description":"القنوات الرقمية التي تمكّن المعتمر من الحصول على خدمات العمرة بصورة مباشرة."},
+    {"id":"agents","name":"العمرة عبر الوكلاء والمجموعات","description":"رحلة الوكيل الخارجي وشركة العمرة والمجموعات والبرامج والخدمات المرتبطة بها."},
+    {"id":"specialized","name":"الخدمات النوعية والمساندة","description":"الخدمات المستحدثة والتكاملات التشغيلية والمالية التي تدعم رحلة العمرة."},
+    {"id":"enablement","name":"التمكين والحوكمة الرقمية","description":"حوكمة الأداء والبيانات والتكاملات والباكلوق والمتابعة المؤسسية."}
+  ],
+  "items": {
+    "ota":{"pillar":"direct","elementType":"محفظة قناة رقمية","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"تشغيل جزئي","operationsOwner":"وكالة العمرة + فريق OTA"},
+    "nusuk-app":{"pillar":"direct","elementType":"محفظة منتج رقمي","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"قائم ويستقبل تحسينات","operationsOwner":"مالك منتج تطبيق نسك"},
+    "external-agents":{"pillar":"agents","elementType":"محفظة خدمة","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"تشغيل قائم","operationsOwner":"وكالة العمرة + مركز المعلومات"},
+    "programs":{"pillar":"agents","elementType":"مسار خدمة","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"تشغيل قائم","operationsOwner":"مالك خدمة البرامج"},
+    "pilgrim-group-services":{"pillar":"agents","elementType":"مسار خصائص","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"بانتظار الإطلاق","operationsOwner":"وكالة العمرة + مركز المعلومات"},
+    "visa":{"pillar":"specialized","elementType":"مبادرة نوعية","nature":"مؤقت حتى الإطلاق","technicalState":"قيد التطوير","operatingState":"بانتظار التسليم","operationsOwner":"مالك خدمة التأشيرات"},
+    "catering":{"pillar":"specialized","elementType":"محفظة خدمة مساندة","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"تشغيل قائم مع تطوير","operationsOwner":"وكالة العمرة + الأمانات"},
+    "flights":{"pillar":"specialized","elementType":"مبادرة تكامل","nature":"مؤقت حتى الاستقرار","technicalState":"متعثر","operatingState":"بانتظار التمكين","operationsOwner":"مركز معلومات الحج والعمرة"},
+    "traveler":{"pillar":"specialized","elementType":"مبادرة تجريبية","nature":"مؤقت","technicalState":"بانتظار الاختبار","operatingState":"لم يبدأ التشغيل","operationsOwner":"مالك الخدمة بعد اعتماد التوسع"},
+    "tourism-integration":{"pillar":"specialized","elementType":"محفظة تكامل حكومي","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"تشغيل جزئي","operationsOwner":"وكالة العمرة + وزارة السياحة"},
+    "licensing":{"pillar":"specialized","elementType":"مشروع تكامل حكومي","nature":"مؤقت حتى التسليم","technicalState":"قيد التطوير","operatingState":"بانتظار التدريب والتسليم","operationsOwner":"مالك خدمة الترخيص"},
+    "finance":{"pillar":"specialized","elementType":"محفظة مالية","nature":"مستدام","technicalState":"قيد التطوير","operatingState":"تشغيل قائم مع معالجة","operationsOwner":"المالية + وكالة العمرة"},
+    "marketing-incentives":{"pillar":"specialized","elementType":"مبادرة تطوير","nature":"مؤقت حتى الإطلاق","technicalState":"بانتظار الجدولة","operatingState":"لم يبدأ التشغيل","operationsOwner":"وكالة العمرة + المالية"},
+    "marhaba":{"pillar":"specialized","elementType":"مشروع تقني","nature":"مؤقت","technicalState":"منجز تقنيًا","operatingState":"مسلّم للتشغيل","operationsOwner":"مالك خدمة نسك مرحبا"},
+    "makkah-notifications":{"pillar":"specialized","elementType":"أتمتة تشغيلية","nature":"مستدام بعد التسليم","technicalState":"منجز تقنيًا","operatingState":"مسلّم للتشغيل","operationsOwner":"إدارة التأشيرات والتصاريح"},
+    "classification":{"pillar":"enablement","elementType":"محفظة حوكمة أداء","nature":"مستدام","technicalState":"قيد التحسين","operatingState":"تشغيل قائم","operationsOwner":"إدارة التصنيف والامتثال"},
+    "asp":{"pillar":"enablement","elementType":"محفظة تمكين تقني","nature":"مستدام","technicalState":"متعثر","operatingState":"تشغيل جزئي","operationsOwner":"مركز المعلومات + مزودو ASP"},
+    "governance":{"pillar":"enablement","elementType":"محفظة حوكمة","nature":"مستدام","technicalState":"قيد التفعيل","operatingState":"تشغيل مستمر","operationsOwner":"إدارة متابعة الأنظمة الرقمية"}
+  },
+  "closureGates":["اكتمال التطوير","نجاح الاختبار","قبول مالك الأعمال","الإتاحة في الإنتاج","نشر الدليل والتدريب عند الحاجة","تسليم التشغيل","إرفاق دليل الإنجاز","تحديد مؤشرات الأثر"]
+}
