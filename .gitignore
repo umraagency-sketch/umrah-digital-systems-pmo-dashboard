@@ -1,0 +1,3 @@
+tmp/
+evidence/*.pdf
+!evidence/.gitkeep
