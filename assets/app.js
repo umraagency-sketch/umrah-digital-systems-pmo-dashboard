@@ -17,7 +17,7 @@ async function boot(){
   const savedOrder=readLocal(ORDER_KEY,[]);if(savedOrder.length)DB.portfolios.sort((a,b)=>{const ai=savedOrder.indexOf(a.id),bi=savedOrder.indexOf(b.id);return(ai<0?999:ai)-(bi<0?999:bi)});
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); syncViewControls(); render(); reveal();
   const params=new URLSearchParams(location.search),printId=params.get('print'),weeklyId=params.get('weekly');
-  if(printId&&DB.portfolios.some(p=>p.id===printId)){openPortfolio(printId);document.body.classList.add('print-portfolio')}
+  if(printId&&DB.portfolios.some(p=>p.id===printId)){openPortfolio(printId);document.body.classList.add('print-portfolio');setPortfolioPrintTitle()}
   if(weeklyId&&DB.weeks.some(w=>w.id===weeklyId)){state.week=weeklyId;$('#weekFilter').value=weeklyId;render();openWeeklyReport();document.body.classList.add('print-weekly')}
 }
 
@@ -45,8 +45,8 @@ function bind(){
   $('#weeklyReportDialog .close').addEventListener('click',()=>$('#weeklyReportDialog').close());
   $('#weeklyReportDialog').addEventListener('click',e=>{if(e.target.closest('[data-week-print]')){document.body.classList.add('print-weekly');window.print()}});
   $('#priorityModeBtn').addEventListener('click',()=>{state.priorityEdit=!state.priorityEdit;document.body.classList.toggle('priority-edit',state.priorityEdit);$('#priorityModeBtn').textContent=state.priorityEdit?'حفظ الترتيب':'ترتيب الأولويات';renderServices()});
-  $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');window.print();return}const done=e.target.closest('[data-complete]');if(done){completeWork(done.dataset.portfolio,done.dataset.complete);return}const evidence=e.target.closest('[data-evidence]');if(evidence)alert(evidence.dataset.evidence)});
-  addEventListener('afterprint',()=>document.body.classList.remove('print-portfolio','print-weekly'));
+  $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');setPortfolioPrintTitle();window.print();return}const done=e.target.closest('[data-complete]');if(done){completeWork(done.dataset.portfolio,done.dataset.complete);return}const evidence=e.target.closest('[data-evidence]');if(evidence)alert(evidence.dataset.evidence)});
+  addEventListener('afterprint',()=>{document.body.classList.remove('print-portfolio','print-weekly');if(document.body.dataset.screenTitle){document.title=document.body.dataset.screenTitle;delete document.body.dataset.screenTitle}});
   $('#servicesGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-open]');if(btn)openPortfolio(btn.dataset.open)});
   $$('.view-toggle [data-view]').forEach(btn=>btn.addEventListener('click',()=>{state.view=btn.dataset.view;state.priorityEdit=false;document.body.classList.remove('priority-edit');syncViewControls();renderServices()}));
   bindDragAndDrop();
@@ -218,8 +218,15 @@ function openPortfolio(id){
     ${d?.decisions?`<section class="decision-strip"><h3>القرارات والتوجهات</h3>${d.decisions.map(x=>`<span>${esc(x)}</span>`).join('')}</section>`:''}
     <div class="detail-grid"><section><h3>سجل الأعمال</h3><p class="work-hint">اسحب الأعمال غير المنجزة لترتيب أولوية التنفيذ داخل المحفظة.</p><div class="work-table">${items.map((x,i)=>`<article draggable="${x.status!=='done'}" data-work-id="${esc(x.id)}" data-portfolio="${p.id}" data-done="${x.status==='done'}"><div><span class="work-rank">${ar(i+1)}</span><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><b>${esc(x.id)} · ${esc(x.title)}</b></div>${x.requestDate?`<p><strong>تاريخ الطلب:</strong> ${esc(x.requestDate)}</p>`:''}<p><strong>المالك:</strong> ${esc(x.owner)}</p><p><strong>دليل إنشاء الطلب:</strong> ${esc(x.requestEvidence||x.evidence)}</p><p><strong>التالي:</strong> ${esc(x.next)}</p><p><strong>الدعم:</strong> ${esc(x.support)}</p>${x.completionEvidence?`<p class="completion-evidence"><strong>دليل الإنجاز:</strong> ${esc(x.completionEvidence)} · ${esc(x.completionDate)}</p>`:''}<div class="work-actions">${evidenceLinks(x)||`<button data-evidence="${esc(x.requestEvidence||x.evidence)}">عرض الدليل</button>`}${x.status!=='done'?`<button class="complete-btn" data-complete="${esc(x.id)}" data-portfolio="${p.id}">تسجيل الإنجاز</button>`:''}</div></article>`).join('')}</div></section>
     <aside><h3>القيمة المتحققة</h3>${(d?.benefits||[{value:'إنجاز تشغيلي',evidence:p.lastUpdate,measure:'يتطلب مؤشر أثر معتمد'}]).map(x=>`<div class="benefit"><b>${esc(x.value)}</b><span>${esc(x.evidence)}</span><small>${esc(x.measure)}</small></div>`).join('')}<div class="data-callout"><b>قاعدة الإغلاق</b><p>${esc(DETAILS.framework.closureRule)}</p></div></aside></div>
-    ${d?.risks?`<section class="risk-section"><h3>سجل المخاطر والتصعيد</h3><div class="risk-table"><div class="risk-head"><b>الخطر</b><b>المستوى</b><b>المالك</b><b>المعالجة</b><b>محفز التصعيد</b></div>${d.risks.map(r=>`<article><div><small>${esc(r.id)}</small><b>${esc(r.risk)}</b></div><span class="risk-level">${esc(r.level)}</span><span>${esc(r.owner)}</span><span>${esc(r.mitigation)}</span><span>${esc(r.escalation)}</span></article>`).join('')}</div></section>`:''}`;
+    ${d?.risks?`<section class="risk-section"><h3>سجل المخاطر والتصعيد</h3><div class="risk-table"><div class="risk-head"><b>الخطر</b><b>المستوى</b><b>المالك</b><b>المعالجة</b><b>محفز التصعيد</b></div>${d.risks.map(r=>`<article><div><small>${esc(r.id)}</small><b>${esc(r.risk)}</b></div><span class="risk-level">${esc(r.level)}</span><span>${esc(r.owner)}</span><span>${esc(r.mitigation)}</span><span>${esc(r.escalation)}</span></article>`).join('')}</div></section>`:''}<footer class="portfolio-print-footer"><span><b>قاعدة الإغلاق:</b> ${esc(DETAILS.framework.closureRule)}</span><i>إدارة متابعة الأنظمة الرقمية · وكالة العمرة</i></footer>`;
   if(!$('#portfolioDialog').open)$('#portfolioDialog').showModal();
+}
+
+function setPortfolioPrintTitle(){
+  const name=$('#portfolioDetail h2')?.textContent.trim();
+  if(!name)return;
+  if(!document.body.dataset.screenTitle)document.body.dataset.screenTitle=document.title;
+  document.title=name;
 }
 
 function buildRaci(governance,p){

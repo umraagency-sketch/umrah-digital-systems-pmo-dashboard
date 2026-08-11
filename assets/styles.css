@@ -89,6 +89,65 @@ html{scroll-behavior:auto}.ambient i{animation:none;filter:none;opacity:.13}.top
   body.print-portfolio .milestone,body.print-portfolio .work-table article,body.print-portfolio .raci-table article,body.print-portfolio .risk-table article{break-inside:avoid!important}
 }
 
+/* Ministerial three-page portfolio brief. Keep this final print block last. */
+.portfolio-print-footer{display:none}
+@media print{
+  @page{size:A4 portrait;margin:8mm 8mm 15mm}
+  body.print-portfolio #portfolioDetail{width:194mm!important;min-height:0!important}
+  body.print-portfolio .portfolio-titlebar{margin:0 0 2.5mm!important;padding:0 0 3mm!important}
+  body.print-portfolio .portfolio-titlebar h2{font-size:22pt!important;line-height:1.12!important}
+  body.print-portfolio .portfolio-titlebar .eyebrow{font-size:8.5pt!important;margin-bottom:1mm!important}
+  body.print-portfolio .detail-stats{order:2!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2mm!important;margin:2.5mm 0 4mm!important}
+  body.print-portfolio .detail-stats .total{grid-column:auto!important}
+  body.print-portfolio .detail-stats div{min-height:20mm!important;padding:2.5mm!important;border-radius:2.5mm!important;text-align:center!important}
+  body.print-portfolio .detail-stats b{font-size:19pt!important}
+  body.print-portfolio .detail-stats span{font-size:9pt!important;margin-top:1.5mm!important}
+  body.print-portfolio .portfolio-kpis,body.print-portfolio .portfolio-tracks,body.print-portfolio .service-catalog{display:none!important}
+  body.print-portfolio .detail-grid{order:4!important;display:block!important;margin:0!important;break-after:page!important;page-break-after:always!important}
+  body.print-portfolio .detail-grid>aside{display:none!important}
+  body.print-portfolio .detail-grid>section>h3{margin:0 0 2mm!important;padding-bottom:2mm!important;border-bottom:1px solid #bfd0ca!important;font-size:15pt!important;color:#0d6957!important}
+  body.print-portfolio .work-table{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:2.3mm!important}
+  body.print-portfolio .work-table article{padding:3mm!important;border-radius:2.5mm!important;break-inside:avoid!important;background:#f7faf8!important}
+  body.print-portfolio .work-table article b{font-size:11.5pt!important;line-height:1.3!important}
+  body.print-portfolio .work-table p{display:block!important;margin:1mm 0 0!important;font-size:10pt!important;line-height:1.35!important}
+  body.print-portfolio .work-rank{min-width:6mm!important;height:6mm!important;font-size:8pt!important}
+  body.print-portfolio .badge{font-size:8pt!important}
+  body.print-portfolio .milestone-section{order:5!important;margin:0 0 4mm!important;padding:4mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  body.print-portfolio .milestone-heading h3{font-size:14pt!important}
+  body.print-portfolio .milestone{grid-template-columns:8mm minmax(0,1fr) 24mm!important;padding-bottom:3mm!important;break-inside:avoid!important}
+  body.print-portfolio .milestone b{font-size:11pt!important}
+  body.print-portfolio .milestone p{font-size:9.75pt!important}
+  body.print-portfolio .decision-strip{order:7!important;margin:0 0 4mm!important;padding:4mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  body.print-portfolio .decision-strip h3{font-size:13pt!important}
+  body.print-portfolio .decision-strip span{font-size:9.75pt!important}
+  body.print-portfolio .governance-section{order:8!important;margin:0!important;padding:4mm!important;break-inside:avoid!important;page-break-inside:avoid!important;break-after:page!important;page-break-after:always!important}
+  body.print-portfolio .governance-section>h3{font-size:13pt!important}
+  body.print-portfolio .governance-rail b{font-size:10pt!important}
+  body.print-portfolio .governance-rail small{font-size:9pt!important;color:#17241f!important}
+  body.print-portfolio .raci-section{order:8!important;margin:0 0 5mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  body.print-portfolio .raci-section h3{font-size:14pt!important}
+  body.print-portfolio .raci-head,body.print-portfolio .raci-table article{padding:3mm!important}
+  body.print-portfolio .raci-table article>div b{font-size:10pt!important}
+  body.print-portfolio .raci-table article>div small,body.print-portfolio .raci-table article p{font-size:9pt!important;color:#17241f!important}
+  body.print-portfolio .evm-section{order:8!important;margin:0!important;padding:4mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  body.print-portfolio .evm-section h3{font-size:14pt!important}
+  body.print-portfolio .evm-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:2.5mm!important}
+  body.print-portfolio .evm-grid div{padding:3mm!important;background:#f7faf8!important;border:1px solid #d6e2dd!important}
+  body.print-portfolio .evm-grid span{font-size:9pt!important;color:#34443e!important}
+  body.print-portfolio .evm-grid b{font-size:15pt!important;color:#111!important}
+  body.print-portfolio .risk-section{display:none!important}
+  body.print-portfolio .detail-lead{order:9!important;margin:5mm 0 2mm!important;padding:3mm 0 0!important;font-size:9pt!important}
+  body.print-portfolio #portfolioDetail>.poc-strip{order:10!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:2mm!important;margin:0!important}
+  body.print-portfolio #portfolioDetail>.poc-strip span{padding:2mm!important;font-size:8.5pt!important}
+  body.print-portfolio #portfolioDetail>.delivery-summary{order:11!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:1.5mm!important;margin:2mm 0 0!important}
+  body.print-portfolio #portfolioDetail>.delivery-summary div{padding:1.5mm!important}
+  body.print-portfolio #portfolioDetail>.delivery-summary span{font-size:7pt!important;color:#0d6957!important}
+  body.print-portfolio #portfolioDetail>.delivery-summary b{font-size:8pt!important;color:#111!important}
+  body.print-portfolio .portfolio-print-footer{order:12!important;display:flex!important;justify-content:space-between!important;align-items:center!important;gap:5mm!important;margin-top:4mm!important;padding-top:2.5mm!important;border-top:1px solid #0d6957!important;color:#34443e!important;font-size:8pt!important}
+  body.print-portfolio .portfolio-print-footer b{color:#0d6957!important}
+  body.print-portfolio .portfolio-print-footer i{white-space:nowrap!important;color:#0d6957!important;font-style:normal!important}
+}
+
 .service-catalog{display:grid;grid-template-columns:1.4fr .6fr;gap:12px;margin:18px 0 24px}.service-catalog>article{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(56,201,149,.045)}.service-catalog>article.missing{border-color:rgba(229,120,109,.45);background:rgba(229,120,109,.055)}.service-catalog header{display:flex;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}.service-catalog header span{color:var(--green)}.service-catalog .missing header span{color:var(--red)}.service-catalog header b{color:var(--gold)}.service-catalog ol{columns:2;column-gap:28px;margin:12px 0 0;padding-right:24px}.service-catalog li{break-inside:avoid;padding:4px 0;color:#dce6e2;font-size:.78rem}.service-catalog .missing ol{columns:1}.service-catalog p{padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:.74rem}
 @media print{
   body.print-portfolio .service-catalog{gap:3mm!important;margin:3mm 0!important;break-inside:avoid!important}
@@ -244,4 +303,25 @@ html{scroll-behavior:auto}.ambient i{animation:none;filter:none;opacity:.13}.top
   body.print-portfolio .poc-strip{gap:2mm!important;margin:2mm 0 3mm!important}
   body.print-portfolio .poc-strip span{padding:2mm!important;border-color:#d6e2dd!important;background:#f7faf8!important;color:#111!important;font-size:9pt!important}
   body.print-portfolio .poc-strip b{color:#0d6957!important;font-size:8pt!important}
+}
+
+/* Final authority for the three-page portfolio print composition. */
+@media print{
+  body.print-portfolio #portfolioDetail{width:194mm!important}
+  body.print-portfolio .detail-stats{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  body.print-portfolio .detail-stats .total{grid-column:auto!important}
+  body.print-portfolio .detail-grid{display:block!important;grid-template-columns:1fr!important;break-after:page!important;page-break-after:always!important}
+  body.print-portfolio .detail-grid>aside{display:none!important}
+  body.print-portfolio .work-table{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:2.3mm!important}
+  body.print-portfolio .work-table article{padding:3mm!important}
+  body.print-portfolio .work-table article b{font-size:11.5pt!important;line-height:1.3!important}
+  body.print-portfolio .work-table p{display:block!important;margin:1mm 0 0!important;font-size:10pt!important;line-height:1.35!important}
+  body.print-portfolio .work-table article{min-height:58mm!important;padding:4mm!important}
+  body.print-portfolio .work-table article b{font-size:12pt!important}
+  body.print-portfolio .work-table p{font-size:10.5pt!important;line-height:1.42!important}
+  body.print-portfolio .milestone-section,body.print-portfolio .decision-strip,body.print-portfolio .governance-section,body.print-portfolio .raci-section,body.print-portfolio .evm-section{break-inside:avoid!important;page-break-inside:avoid!important}
+  body.print-portfolio .milestone-heading h3,body.print-portfolio .decision-strip h3,body.print-portfolio .governance-section>h3,body.print-portfolio .raci-section h3,body.print-portfolio .evm-section h3{color:#0d6957!important}
+  body.print-portfolio .governance-section{break-after:page!important;page-break-after:always!important}
+  body.print-portfolio .risk-section{display:none!important}
+  body.print-portfolio #portfolioDetail>.delivery-summary{grid-template-columns:repeat(6,minmax(0,1fr))!important}
 }
