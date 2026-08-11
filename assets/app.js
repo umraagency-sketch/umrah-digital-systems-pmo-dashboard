@@ -1,6 +1,9 @@
 const COLORS={done:'#38c995',progress:'#d2b46d',pending:'#60aee8',risk:'#e5786d',study:'#9c89d9',out:'#637872',unclassified:'#8b9a96'};
 const STATUS={done:'منجز ومقبول تشغيليًا',progress:'قيد التنفيذ',pending:'بانتظار إجراء',risk:'متعثر أو معرّض للخطر'};
-let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',leader:'all',search:''},raf=[];
+let DB,DETAILS,state={week:'',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false},raf=[];
+const ORDER_KEY='umrah-pmo-portfolio-order-v1',WORK_KEY='umrah-pmo-work-state-v1';
+const readLocal=(key,fallback={})=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
+const writeLocal=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ar=n=>Number(n||0).toLocaleString('ar-SA');
@@ -10,6 +13,7 @@ const pocMarkup=p=>{const x=p.poc||p.boc,items=[['POC · وكالة العمرة
 async function boot(){
   try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2])}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
+  const savedOrder=readLocal(ORDER_KEY,[]);if(savedOrder.length)DB.portfolios.sort((a,b)=>{const ai=savedOrder.indexOf(a.id),bi=savedOrder.indexOf(b.id);return(ai<0?999:ai)-(bi<0?999:bi)});
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); render(); reveal();
   const params=new URLSearchParams(location.search),printId=params.get('print'),weeklyId=params.get('weekly');
   if(printId&&DB.portfolios.some(p=>p.id===printId)){openPortfolio(printId);document.body.classList.add('print-portfolio')}
@@ -37,9 +41,11 @@ function bind(){
   $('#weeklyReportBtn').addEventListener('click',openWeeklyReport);
   $('#weeklyReportDialog .close').addEventListener('click',()=>$('#weeklyReportDialog').close());
   $('#weeklyReportDialog').addEventListener('click',e=>{if(e.target.closest('[data-week-print]')){document.body.classList.add('print-weekly');window.print()}});
-  $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');window.print()}});
+  $('#priorityModeBtn').addEventListener('click',()=>{state.priorityEdit=!state.priorityEdit;document.body.classList.toggle('priority-edit',state.priorityEdit);$('#priorityModeBtn').textContent=state.priorityEdit?'حفظ الترتيب':'ترتيب الأولويات';renderServices()});
+  $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');window.print();return}const done=e.target.closest('[data-complete]');if(done){completeWork(done.dataset.portfolio,done.dataset.complete);return}const evidence=e.target.closest('[data-evidence]');if(evidence)alert(evidence.dataset.evidence)});
   addEventListener('afterprint',()=>document.body.classList.remove('print-portfolio','print-weekly'));
   $('#servicesGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-open]');if(btn)openPortfolio(btn.dataset.open)});
+  bindDragAndDrop();
   addEventListener('resize',debounce(renderCharts,180));
 }
 
@@ -91,16 +97,34 @@ function renderDecisions(){$('#decisionList').innerHTML=DB.decisions.map(d=>`<di
 
 function renderServices(){
   const ps=filtered(); $('#resultsCount').textContent=`عرض ${ar(ps.length)} من ${ar(relevant().length)} محفظة نشطة في الفترة`;
-  $('#servicesGrid').innerHTML=ps.length?ps.map((p,i)=>`<article class="service-card ${p.status==='risk'||p.priority==='critical'?'needs-attention':''}" style="--status:${COLORS[p.status]};--progress:${p.progress}%;animation-delay:${i*55}ms">
+  $('#servicesGrid').innerHTML=ps.length?ps.map((p,i)=>{const rank=DB.portfolios.indexOf(p)+1;return `<article class="service-card ${rank<=10?'top-priority ':''}${p.status==='risk'||p.priority==='critical'?'needs-attention':''}" draggable="${state.priorityEdit}" data-portfolio-id="${p.id}" style="--status:${COLORS[p.status]};--progress:${p.progress}%;animation-delay:${i*55}ms">
     <div class="card-top"><div><span class="service-code">${p.code} · ${esc(p.type)}</span><h3>${esc(p.name)}</h3></div><span class="badge">${STATUS[p.status]}</span></div>
+    <div class="priority-rank"><b>${ar(rank)}</b><span>${rank<=10?'ضمن أعلى 10 أولويات':'ترتيب المحفظة'}</span></div>
     <p class="service-meta">${esc(p.owner)} · نطاق المحفظة تحت المطابقة البندية</p>${pocMarkup(p)}
     <div class="progress-line"><i></i></div><div class="progress-label"><span>التقدم التقديري</span><b>${ar(p.progress)}%</b></div>
     <ul><li><b>آخر تحديث:</b> ${esc(p.lastUpdate)}</li><li><b>المخاطر:</b> ${esc(p.risk)}</li></ul>
     <div class="next-action"><span>الإجراء القادم</span>${esc(p.next)}</div>
     <div class="next-action" style="margin-top:8px"><span>الدعم المطلوب</span>${esc(p.support)}</div>
     <button class="portfolio-open" data-open="${p.id}">فتح غرفة المتابعة ←</button>
-  </article>`).join(''):'<div class="empty">لا توجد محافظ تطابق المرشحات الحالية.</div>';
+  </article>`}).join(''):'<div class="empty">لا توجد محافظ تطابق المرشحات الحالية.</div>';
 }
+
+function bindDragAndDrop(){
+  let draggedPortfolio=null,draggedWork=null;
+  $('#servicesGrid').addEventListener('dragstart',e=>{const card=e.target.closest('[data-portfolio-id]');if(!state.priorityEdit||!card)return e.preventDefault();draggedPortfolio=card.dataset.portfolioId;card.classList.add('dragging')});
+  $('#servicesGrid').addEventListener('dragover',e=>{if(draggedPortfolio){e.preventDefault();e.target.closest('[data-portfolio-id]')?.classList.add('drag-over')}});
+  $('#servicesGrid').addEventListener('dragleave',e=>e.target.closest('[data-portfolio-id]')?.classList.remove('drag-over'));
+  $('#servicesGrid').addEventListener('drop',e=>{const target=e.target.closest('[data-portfolio-id]');if(!target||!draggedPortfolio)return;e.preventDefault();reorderPortfolio(draggedPortfolio,target.dataset.portfolioId);draggedPortfolio=null});
+  $('#servicesGrid').addEventListener('dragend',()=>{$$('.dragging,.drag-over').forEach(x=>x.classList.remove('dragging','drag-over'));draggedPortfolio=null});
+  $('#portfolioDialog').addEventListener('dragstart',e=>{const row=e.target.closest('[data-work-id]');if(!row||row.dataset.done==='true')return e.preventDefault();draggedWork={portfolio:row.dataset.portfolio,id:row.dataset.workId};row.classList.add('dragging')});
+  $('#portfolioDialog').addEventListener('dragover',e=>{if(draggedWork){e.preventDefault();e.target.closest('[data-work-id]')?.classList.add('drag-over')}});
+  $('#portfolioDialog').addEventListener('drop',e=>{const target=e.target.closest('[data-work-id]');if(!target||!draggedWork)return;e.preventDefault();reorderWork(draggedWork.portfolio,draggedWork.id,target.dataset.workId);draggedWork=null});
+  $('#portfolioDialog').addEventListener('dragend',()=>{$$('.dragging,.drag-over').forEach(x=>x.classList.remove('dragging','drag-over'));draggedWork=null});
+}
+function reorderPortfolio(from,to){if(from===to)return;const fromIndex=DB.portfolios.findIndex(x=>x.id===from),toIndex=DB.portfolios.findIndex(x=>x.id===to),[item]=DB.portfolios.splice(fromIndex,1);DB.portfolios.splice(toIndex,0,item);writeLocal(ORDER_KEY,DB.portfolios.map(x=>x.id));fillFilters();renderServices()}
+function workItemsFor(p,d){const base=d?.workItems||p.achieved.map((x,i)=>({id:`${p.code}-${i+1}`,title:x,status:'done',owner:p.owner,evidence:'تحديث المحفظة',next:p.next,support:p.support})),saved=readLocal(WORK_KEY,{}),portfolio=saved[p.id]||{};const items=base.map(x=>({...x,...portfolio.items?.[x.id]})),order=portfolio.order||[];return items.sort((a,b)=>{if(a.status==='done'&&b.status!=='done')return 1;if(b.status==='done'&&a.status!=='done')return-1;const ai=order.indexOf(a.id),bi=order.indexOf(b.id);return(ai<0?999:ai)-(bi<0?999:bi)})}
+function reorderWork(portfolio,from,to){if(from===to)return;const saved=readLocal(WORK_KEY,{}),p=DB.portfolios.find(x=>x.id===portfolio),items=workItemsFor(p,DETAILS[portfolio]).filter(x=>x.status!=='done'),order=items.map(x=>x.id),fi=order.indexOf(from),ti=order.indexOf(to);if(fi<0||ti<0)return;const[item]=order.splice(fi,1);order.splice(ti,0,item);saved[portfolio]={...(saved[portfolio]||{}),order};writeLocal(WORK_KEY,saved);openPortfolio(portfolio)}
+function completeWork(portfolio,id){const evidence=prompt('أدخل دليل الإنجاز: رقم الطلب، رابط المستند، أو مرجع البريد.');if(!evidence)return;const saved=readLocal(WORK_KEY,{});saved[portfolio]=saved[portfolio]||{};saved[portfolio].items=saved[portfolio].items||{};saved[portfolio].items[id]={status:'done',completionDate:new Date().toLocaleDateString('ar-SA'),completionEvidence:evidence};writeLocal(WORK_KEY,saved);openPortfolio(portfolio)}
 
 function openWeeklyReport(){
   const w=week(),ps=relevant(),avg=ps.length?Math.round(ps.reduce((s,p)=>s+p.progress,0)/ps.length):0;
@@ -128,7 +152,7 @@ function openWeeklyReport(){
 }
 
 function openPortfolio(id){
-  const p=DB.portfolios.find(x=>x.id===id),d=DETAILS[id],items=d?.workItems||p.achieved.map((x,i)=>({id:`${p.code}-${i+1}`,title:x,status:'done',owner:p.owner,evidence:'تحديث المحفظة',next:p.next,support:p.support}));
+  const p=DB.portfolios.find(x=>x.id===id),d=DETAILS[id],items=workItemsFor(p,d);
   const milestones=d?.milestones||[...p.achieved.map((x,i)=>({date:`معلم ${ar(i+1)}`,title:x,status:'done',detail:'مخرج موثق ضمن سجل المحفظة.',evidence:'سجل تحديثات المحفظة'})),{date:'آخر تحديث',title:'الحالة التنفيذية الحالية',status:p.status,detail:p.lastUpdate,evidence:'آخر تحديث مسجل'}];
   const raci=d?.raci||buildRaci(d?.governance,p);
   const stats=['done','progress','pending','risk'].map(s=>({s,n:items.filter(x=>x.status===s).length}));
@@ -143,10 +167,10 @@ function openPortfolio(id){
     <section class="raci-section"><div class="milestone-heading"><div><p class="eyebrow">حوكمة أصحاب المصلحة</p><h3>مصفوفة المسؤوليات RACI</h3></div><span>توزيع الأدوار</span></div><div class="raci-legend"><span><b>R</b> المنفّذ</span><span><b>A</b> المساءل وصاحب الاعتماد</span><span><b>C</b> المستشار</span><span><b>I</b> المُحاط بالتحديث</span></div><div class="raci-table"><div class="raci-head"><b>الجهة / صاحب المصلحة</b><b>الدور</b><b>المسؤولية</b></div>${raci.map(x=>`<article><div><b>${esc(x.party)}</b><small>${esc(x.level||'صاحب مصلحة')}</small></div><span class="raci-code ${esc(x.role).toLowerCase()}">${esc(x.role)}</span><p>${esc(x.duty)}</p></article>`).join('')}</div></section>
     ${e?`<section class="evm-section"><header><div><h3>القيمة المكتسبة EVM</h3><small>${esc(e.basis)}</small></div><span>${esc(e.unit)}</span></header><div class="evm-grid"><div><span>خط الأساس BAC</span><b>${ar(e.baseline)}</b></div><div><span>القيمة المخططة PV</span><b>${ar(e.planned)}</b></div><div><span>القيمة المكتسبة EV</span><b>${ar(e.earned)}</b></div><div class="${sv<0?'negative':'positive'}"><span>انحراف الجدول SV</span><b>${sv>0?'+':''}${ar(sv)}</b></div><div class="${spi<1?'negative':'positive'}"><span>مؤشر الجدول SPI</span><b>${spi.toFixed(2)}</b></div><div><span>انحراف التكلفة CV</span><b>${cv==null?'غير متاح':ar(cv)}</b></div><div><span>مؤشر التكلفة CPI</span><b>${cpi==null?'غير متاح':cpi.toFixed(2)}</b></div></div></section>`:''}
     ${d?.decisions?`<section class="decision-strip"><h3>القرارات والتوجهات</h3>${d.decisions.map(x=>`<span>${esc(x)}</span>`).join('')}</section>`:''}
-    <div class="detail-grid"><section><h3>سجل الأعمال</h3><div class="work-table">${items.map(x=>`<article><div><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><b>${esc(x.id)} · ${esc(x.title)}</b></div><p><strong>المالك:</strong> ${esc(x.owner)}</p><p><strong>الدليل:</strong> ${esc(x.evidence)}</p><p><strong>التالي:</strong> ${esc(x.next)}</p><p><strong>الدعم:</strong> ${esc(x.support)}</p></article>`).join('')}</div></section>
+    <div class="detail-grid"><section><h3>سجل الأعمال</h3><p class="work-hint">اسحب الأعمال غير المنجزة لترتيب أولوية التنفيذ داخل المحفظة.</p><div class="work-table">${items.map((x,i)=>`<article draggable="${x.status!=='done'}" data-work-id="${esc(x.id)}" data-portfolio="${p.id}" data-done="${x.status==='done'}"><div><span class="work-rank">${ar(i+1)}</span><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><b>${esc(x.id)} · ${esc(x.title)}</b></div>${x.requestDate?`<p><strong>تاريخ الطلب:</strong> ${esc(x.requestDate)}</p>`:''}<p><strong>المالك:</strong> ${esc(x.owner)}</p><p><strong>دليل إنشاء الطلب:</strong> ${esc(x.requestEvidence||x.evidence)}</p><p><strong>التالي:</strong> ${esc(x.next)}</p><p><strong>الدعم:</strong> ${esc(x.support)}</p>${x.completionEvidence?`<p class="completion-evidence"><strong>دليل الإنجاز:</strong> ${esc(x.completionEvidence)} · ${esc(x.completionDate)}</p>`:''}<div class="work-actions"><button data-evidence="${esc(x.requestEvidence||x.evidence)}">عرض الدليل</button>${x.status!=='done'?`<button class="complete-btn" data-complete="${esc(x.id)}" data-portfolio="${p.id}">تسجيل الإنجاز</button>`:''}</div></article>`).join('')}</div></section>
     <aside><h3>القيمة المتحققة</h3>${(d?.benefits||[{value:'إنجاز تشغيلي',evidence:p.lastUpdate,measure:'يتطلب مؤشر أثر معتمد'}]).map(x=>`<div class="benefit"><b>${esc(x.value)}</b><span>${esc(x.evidence)}</span><small>${esc(x.measure)}</small></div>`).join('')}<div class="data-callout"><b>قاعدة الإغلاق</b><p>${esc(DETAILS.framework.closureRule)}</p></div></aside></div>
     ${d?.risks?`<section class="risk-section"><h3>سجل المخاطر والتصعيد</h3><div class="risk-table"><div class="risk-head"><b>الخطر</b><b>المستوى</b><b>المالك</b><b>المعالجة</b><b>محفز التصعيد</b></div>${d.risks.map(r=>`<article><div><small>${esc(r.id)}</small><b>${esc(r.risk)}</b></div><span class="risk-level">${esc(r.level)}</span><span>${esc(r.owner)}</span><span>${esc(r.mitigation)}</span><span>${esc(r.escalation)}</span></article>`).join('')}</div></section>`:''}`;
-  $('#portfolioDialog').showModal();
+  if(!$('#portfolioDialog').open)$('#portfolioDialog').showModal();
 }
 
 function buildRaci(governance,p){

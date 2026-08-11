@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071916">
   <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
   <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
-  <link rel="stylesheet" href="assets/styles.css?v=20260809-weekly1">
+  <link rel="stylesheet" href="assets/styles.css?v=20260811-priority1">
 </head>
 <body>
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -42,6 +42,7 @@
       <div><label for="priorityFilter">الأولوية</label><select id="priorityFilter"><option value="all">جميع الأولويات</option><option value="critical">حرجة</option><option value="high">عالية</option><option value="normal">اعتيادية</option></select></div>
       <div><label for="leaderFilter">قائد المبادرة (المحفظة)</label><select id="leaderFilter"><option value="all">جميع قادة المحافظ</option></select></div>
       <div class="search"><label for="searchInput">بحث</label><input id="searchInput" type="search" placeholder="ابحث عن متطلب أو خدمة…"></div>
+      <button id="priorityModeBtn" class="ghost-btn" type="button">ترتيب الأولويات</button>
       <button id="resetFilters" class="ghost-btn">إعادة الضبط</button>
     </section>
 
@@ -97,6 +98,6 @@
     <div id="weeklyReport"></div>
   </dialog>
   <div id="weekToast" class="week-toast" role="status" aria-live="polite"></div>
-  <script src="assets/app.js?v=20260810-leader1" defer></script>
+  <script src="assets/app.js?v=20260811-priority1" defer></script>
 </body>
 </html>
