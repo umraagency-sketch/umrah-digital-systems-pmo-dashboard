@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071916">
   <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
   <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
-  <link rel="stylesheet" href="assets/styles.css?v=20260811-architecture1">
+  <link rel="stylesheet" href="assets/styles.css?v=20260811-paths2">
 </head>
 <body>
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -36,9 +36,13 @@
       </div>
     </section>
 
-    <section class="filter-bar reveal" aria-label="مرشحات البيانات">
+    <div class="filter-launcher reveal">
+      <button id="filterToggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filterBar"><span>☷</span> البحث والتصفية <b id="activeFilterCount" hidden>0</b></button>
+      <span id="filterSummary">عرض جميع المحافظ والمسارات</span>
+    </div>
+    <section class="filter-bar" id="filterBar" aria-label="مرشحات البيانات" hidden>
       <div><label for="scopeFilter">المحافظ المعروضة</label><select id="scopeFilter"><option value="all">كل المحافظ</option><option value="active">عليها نشاط في الأسبوع</option></select></div>
-      <div><label for="pillarFilter">الركيزة</label><select id="pillarFilter"><option value="all">جميع الركائز</option></select></div>
+      <div><label for="pillarFilter">المسار</label><select id="pillarFilter"><option value="all">جميع المسارات</option></select></div>
       <div><label for="natureFilter">الطبيعة</label><select id="natureFilter"><option value="all">مستدامة ومؤقتة</option><option value="sustainable">مستدامة</option><option value="temporary">مؤقتة</option></select></div>
       <div><label for="serviceFilter">الخدمة</label><select id="serviceFilter"><option value="all">جميع الخدمات</option></select></div>
       <div><label for="statusFilter">الحالة</label><select id="statusFilter"><option value="all">جميع الحالات</option><option value="done">منجز</option><option value="progress">قيد التنفيذ</option><option value="pending">بانتظار إجراء</option><option value="risk">متعثّر أو معرّض للخطر</option></select></div>
@@ -68,7 +72,7 @@
       </article>
     </section>
 
-    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2 id="portfolioViewTitle">الخريطة المعمارية للركائز</h2></div><div class="portfolio-view-tools"><div class="view-toggle" role="group" aria-label="طريقة العرض"><button class="active" data-view="architecture">الركائز</button><button data-view="portfolios">المحافظ</button><button data-view="technical">التطوير التقني</button><button data-view="actions">الأعمال القادمة</button><button data-view="operations">التسليم والتشغيل</button></div><p id="resultsCount"></p></div></section>
+    <section class="section-head reveal"><div><p class="eyebrow">محفظة الخدمات</p><h2 id="portfolioViewTitle">الخريطة المعمارية للمسارات</h2></div><div class="portfolio-view-tools"><div class="view-toggle" role="group" aria-label="طريقة العرض"><button class="active" data-view="architecture">المسارات</button><button data-view="portfolios">المحافظ</button><button data-view="technical">التطوير التقني</button><button data-view="actions">الأعمال القادمة</button><button data-view="operations">التسليم والتشغيل</button></div><p id="resultsCount"></p></div></section>
     <section id="servicesGrid" class="services-grid"></section>
 
     <section class="split-grid reveal">
@@ -101,6 +105,6 @@
     <div id="weeklyReport"></div>
   </dialog>
   <div id="weekToast" class="week-toast" role="status" aria-live="polite"></div>
-  <script src="assets/app.js?v=20260811-architecture1" defer></script>
+  <script src="assets/app.js?v=20260811-paths2" defer></script>
 </body>
 </html>

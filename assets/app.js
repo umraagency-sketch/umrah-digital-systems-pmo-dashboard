@@ -25,7 +25,7 @@ function fillFilters(){
   $('#weekFilter').innerHTML=DB.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
   $('#weekFilter').value=state.week;
   $('#serviceFilter').innerHTML='<option value="all">جميع المحافظ</option>'+DB.portfolios.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-  $('#pillarFilter').innerHTML='<option value="all">جميع الركائز</option>'+ARCH.pillars.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  $('#pillarFilter').innerHTML='<option value="all">جميع المسارات</option>'+ARCH.pillars.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   const leaders=[...new Set(DB.portfolios.flatMap(p=>String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim())).filter(x=>x&&x!=='قيد التحديد'&&x!=='لا يوجد'))].sort((a,b)=>a.localeCompare(b,'ar'));
   $('#leaderFilter').innerHTML='<option value="all">جميع قادة المحافظ</option>'+leaders.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('#leaderFilter').value=state.leader;
@@ -34,7 +34,8 @@ function fillFilters(){
 
 function bind(){
   ['weekFilter','scopeFilter','pillarFilter','natureFilter','serviceFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
-  $('#searchInput').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderServices()});
+  $('#searchInput').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();render()});
+  $('#filterToggle').addEventListener('click',()=>{const bar=$('#filterBar'),open=bar.hidden;bar.hidden=!open;$('#filterToggle').setAttribute('aria-expanded',String(open));$('#filterToggle').classList.toggle('open',open);if(open)setTimeout(()=>$('#searchInput').focus(),80)});
   $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture'};fillFilters();['scopeFilter','pillarFilter','natureFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).value='all');$('#searchInput').value='';document.body.classList.remove('priority-edit');syncViewControls();render()});
   $('#presentationBtn').addEventListener('click',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
@@ -56,25 +57,26 @@ function week(){return DB.weeks.find(w=>w.id===state.week)}
 function relevant(){return DB.portfolios.filter(p=>p.weeks.includes(state.week))}
 function displayed(){return state.scope==='active'?relevant():DB.portfolios}
 function filtered(){return displayed().filter(p=>{const leaders=String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim()),a=p.architecture||{},natureMatch=state.nature==='all'||(state.nature==='sustainable'&&a.nature?.includes('مستدام'))||(state.nature==='temporary'&&a.nature?.includes('مؤقت'));return(state.pillar==='all'||a.pillar===state.pillar)&&natureMatch&&(state.service==='all'||p.id===state.service)&&(state.status==='all'||p.status===state.status)&&(state.priority==='all'||p.priority===state.priority)&&(state.leader==='all'||leaders.includes(state.leader))&&(!state.search||JSON.stringify({...p,details:DETAILS[p.id]}).toLowerCase().includes(state.search))})}
-function syncViewControls(){const titles={architecture:'الخريطة المعمارية للركائز',portfolios:'الحالة التنفيذية لكل محفظة',technical:'سجل مشروعات التطوير التقني',actions:'سجل الأعمال القادمة حسب الأولوية',operations:'التسليم والتشغيل بعد الإطلاق'};$$('.view-toggle [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view));$('#portfolioViewTitle').textContent=titles[state.view];$('#priorityModeBtn').style.display=state.view==='portfolios'?'':'none'}
+function syncViewControls(){const titles={architecture:'الخريطة المعمارية للمسارات',portfolios:'الحالة التنفيذية لكل محفظة',technical:'سجل مشروعات التطوير التقني',actions:'سجل الأعمال القادمة حسب الأولوية',operations:'التسليم والتشغيل بعد الإطلاق'};$$('.view-toggle [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view));$('#portfolioViewTitle').textContent=titles[state.view];$('#priorityModeBtn').style.display=state.view==='portfolios'?'':'none'}
+function updateFilterUI(){const keys=['scope','pillar','nature','service','status','priority','leader'],count=keys.filter(k=>state[k]!=='all').length+(state.search?1:0),ps=filtered(),active=ps.filter(p=>p.weeks.includes(state.week)).length,badge=$('#activeFilterCount');badge.textContent=ar(count);badge.hidden=!count;$('#filterSummary').textContent=count?`${ar(ps.length)} محفظة مطابقة · ${ar(active)} عليها نشاط في ${week().label}`:'عرض جميع المحافظ والمسارات'}
 function activityFor(p){if(!p.weeks.includes(state.week))return null;const keys={visa:['التأشيرة','الدخول'],ota:['OTA','المنصات'],classification:['التصنيف'],catering:['الإعاشة'],traveler:['حقيبة'],flights:['الرحلات','الطيران'],'external-agents':['التأهيل','الوكلاء'],'tourism-integration':['السياحة','الفنادق','المرشدين'],'nusuk-app':['الإجهاد','نسك'],'marketing-incentives':['الحوافز']}[p.id]||[];const hit=week().timeline.find(t=>keys.some(k=>(t.title+' '+t.detail).includes(k)));return hit?`${hit.title}: ${hit.detail}`:'نشاط مسجل ضمن نطاق الأسبوع؛ تفاصيل الحدث بانتظار المطابقة البندية مع سجل المحفظة.'}
 
 function render(){
   const w=week(); $('#weekPeriod').textContent=w.period; $('#weekDataNote').textContent=w.quality;
   $('#weekSignals').innerHTML=`<b>${esc(w.summary)}</b><span>${ar(w.metrics.outputs)} مخرجات</span><span>${ar(w.metrics.communications)} مراسلة ومتابعة</span><span>${ar(w.metrics.decisions)} قرارات</span>`;
-  renderMetrics(); renderCharts(); renderDecisions(); renderServices(); renderTimeline(); renderBaseline();
+  renderMetrics(); renderCharts(); renderDecisions(); renderServices(); renderTimeline(); renderBaseline(); updateFilterUI();
 }
 
 function announceWeekChange(){const w=week(),toast=$('#weekToast');document.body.classList.remove('week-switched');void document.body.offsetWidth;document.body.classList.add('week-switched');toast.textContent=`تم تحميل ${w.label}: ${w.metrics.outputs} مخرجات و${w.metrics.decisions} قرارات`;toast.classList.add('show');clearTimeout(announceWeekChange.timer);announceWeekChange.timer=setTimeout(()=>{toast.classList.remove('show');document.body.classList.remove('week-switched')},2600)}
 
 function renderMetrics(){
-  const w=week(), ps=relevant(), active=ps.filter(p=>p.status==='progress'||p.status==='risk').length;
+  const ps=filtered(),active=ps.filter(p=>p.weeks.includes(state.week)).length,items=ps.flatMap(p=>workItemsFor(p,DETAILS[p.id])),open=items.filter(x=>x.status!=='done').length,avg=ps.length?Math.round(ps.reduce((n,p)=>n+p.progress,0)/ps.length):0;
   const cards=[
-    ['إجمالي محفظة المتطلبات',DB.requirements.reportedTotal,'أحدث إجمالي مُبلّغ عنه','accent'],
-    ['الموثق بنداً بنداً',DB.requirements.documentedBaseline,'خط الأساس V12.03',''],
-    ['تحت المطابقة',DB.requirements.underReconciliation,'إضافات جديدة',''],
-    ['مخرجات الأسبوع',w.metrics.outputs,'وثيقة أو قرار أو إطلاق',''],
-    ['محافظ نشطة',active,`من ${ps.length} محفظة في الفترة`,'']
+    ['المحافظ المطابقة',ps.length,'وفق المرشحات الحالية','accent'],
+    ['عليها نشاط',active,`في ${week().label}`,''],
+    ['عناصر العمل',items.length,'ضمن المحافظ المطابقة',''],
+    ['جارية أو قادمة',open,'لم تسجل كمنجزة بعد',''],
+    ['متوسط التقدم',avg,'% للنطاق المعروض','']
   ];
   $('#metrics').innerHTML=cards.map(([l,v,s,c])=>`<article class="metric ${c}"><span>${l}</span><b data-count="${v}">0</b><small>${s}</small></article>`).join('');
   $$('[data-count]').forEach(el=>countUp(el,+el.dataset.count));
@@ -126,8 +128,8 @@ function renderServices(){
 function renderArchitecture(ps){
   $('#servicesGrid').classList.remove('actions-view');$('#servicesGrid').classList.add('architecture-view');
   const groups=ARCH.pillars.map(pillar=>({pillar,items:ps.filter(p=>p.architecture.pillar===pillar.id)})).filter(g=>g.items.length);
-  $('#resultsCount').textContent=`${ar(groups.length)} ركائز · ${ar(ps.length)} محفظة ومسار ومبادرة`;
-  $('#servicesGrid').innerHTML=groups.map(({pillar,items},i)=>`<article class="pillar-card" style="--pillar-index:${i}"><header><span>ركيزة مستدامة ${ar(i+1)}</span><h3>${esc(pillar.name)}</h3><p>${esc(pillar.description)}</p></header><div class="pillar-items">${items.map(p=>{const rank=DB.portfolios.indexOf(p)+1;return `<button data-open="${p.id}"><b>${ar(rank)} · ${esc(p.name)}</b><span>${esc(p.architecture.elementType)} · ${esc(p.architecture.nature)}</span><small>${esc(p.architecture.technicalState)} ← ${esc(p.architecture.operatingState)}</small></button>`}).join('')}</div></article>`).join('')||'<div class="empty">لا توجد ركائز تطابق المرشحات الحالية.</div>';
+  $('#resultsCount').textContent=`${ar(groups.length)} مسارات · ${ar(ps.length)} محفظة ومسار فرعي ومبادرة`;
+  $('#servicesGrid').innerHTML=groups.map(({pillar,items},i)=>`<article class="pillar-card" style="--pillar-index:${i}"><header><span>مسار رئيسي ${ar(i+1)}</span><h3>${esc(pillar.name)}</h3><p>${esc(pillar.description)}</p></header><div class="pillar-items">${items.map(p=>{const rank=DB.portfolios.indexOf(p)+1;return `<button data-open="${p.id}"><b>${ar(rank)} · ${esc(p.name)}</b><span>${esc(p.architecture.elementType)} · ${esc(p.architecture.nature)}</span><small>${esc(p.architecture.technicalState)} ← ${esc(p.architecture.operatingState)}</small></button>`}).join('')}</div></article>`).join('')||'<div class="empty">لا توجد مسارات تطابق المرشحات الحالية.</div>';
 }
 
 function renderTechnicalRegister(ps){
@@ -204,7 +206,7 @@ function openPortfolio(id){
   const raci=d?.raci||buildRaci(d?.governance,p);
   const stats=['done','progress','pending','risk'].map(s=>({s,n:items.filter(x=>x.status===s).length}));
   const e=d?.evm,sv=e?e.earned-e.planned:null,spi=e&&e.planned?e.earned/e.planned:null,cv=e?.actualCost!=null?e.earned-e.actualCost:null,cpi=e?.actualCost?e.earned/e.actualCost:null;
-  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>${pocMarkup(p)}<section class="delivery-summary"><div><span>الركيزة</span><b>${esc(pillar?.name)}</b></div><div><span>نوع العنصر</span><b>${esc(architecture.elementType)}</b></div><div><span>الطبيعة</span><b>${esc(architecture.nature)}</b></div><div><span>التنفيذ التقني</span><b>${esc(architecture.technicalState)}</b></div><div><span>التشغيل والتسليم</span><b>${esc(architecture.operatingState)}</b></div><div><span>مالك التشغيل</span><b>${esc(architecture.operationsOwner)}</b></div></section>
+  $('#portfolioDetail').innerHTML=`<div class="portfolio-titlebar"><div><p class="eyebrow">${p.code} · غرفة متابعة المحفظة</p><h2>${esc(p.name)}</h2></div><button class="print-portfolio-btn" data-print>طباعة / حفظ PDF</button></div><p class="detail-lead">${esc(d?.source||p.lastUpdate)}</p>${pocMarkup(p)}<section class="delivery-summary"><div><span>المسار</span><b>${esc(pillar?.name)}</b></div><div><span>نوع العنصر</span><b>${esc(architecture.elementType)}</b></div><div><span>الطبيعة</span><b>${esc(architecture.nature)}</b></div><div><span>التنفيذ التقني</span><b>${esc(architecture.technicalState)}</b></div><div><span>التشغيل والتسليم</span><b>${esc(architecture.operatingState)}</b></div><div><span>مالك التشغيل</span><b>${esc(architecture.operationsOwner)}</b></div></section>
     <div class="detail-stats">${stats.map(x=>`<div><b>${ar(x.n)}</b><span>${STATUS[x.s]}</span></div>`).join('')}</div>
     ${d?.tracks?`<section class="portfolio-tracks">${d.tracks.map(x=>`<article><div><span>مسار تنفيذي</span><h3>${esc(x.name)}</h3></div><span class="badge" style="--status:${COLORS[x.status]};color:${COLORS[x.status]}">${STATUS[x.status]}</span><p><b>الحالة الحالية:</b> ${esc(x.current)}</p><p><b>الإجراء التالي:</b> ${esc(x.next)}</p><small>${esc(x.owner)}</small></article>`).join('')}</section>`:''}
     ${d?.kpis?`<section class="portfolio-kpis">${d.kpis.map(x=>`<article class="${x.attention?'attention':''}"><b>${esc(x.value)}</b><span>${esc(x.label)}</span><small>${esc(x.note)}</small></article>`).join('')}</section>`:''}
