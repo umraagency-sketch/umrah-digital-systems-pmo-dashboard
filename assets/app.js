@@ -1,6 +1,6 @@
 const COLORS={done:'#38c995',progress:'#d2b46d',pending:'#60aee8',risk:'#e5786d',study:'#9c89d9',out:'#637872',unclassified:'#8b9a96'};
 const STATUS={done:'منجز ومقبول تشغيليًا',progress:'قيد التنفيذ',pending:'بانتظار إجراء',risk:'متعثر أو معرّض للخطر'};
-let DB,DETAILS,ARCH,state={week:'',scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture'},raf=[];
+let DB,DETAILS,ARCH,CENTER_BASELINE,state={week:'',scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture',baselineStatus:'all',baselineResponse:'all',baselineSearch:''},raf=[];
 const ORDER_KEY='umrah-pmo-portfolio-order-v1',WORK_KEY='umrah-pmo-work-state-v1';
 const readLocal=(key,fallback={})=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
 const writeLocal=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
@@ -12,7 +12,7 @@ const pocMarkup=p=>{const x=p.poc||p.boc,items=[['POC · وكالة العمرة
 const evidenceLinks=x=>(x.evidenceLinks||[]).map(link=>{const local=['localhost','127.0.0.1'].includes(location.hostname);return link.restricted&&!local?`<button class="evidence-link restricted" data-evidence="دليل مقيّد للاستخدام الداخلي. يتطلب فتحه تسجيل دخول وصلاحية وصول معتمدة.">${esc(link.label)} · مقيّد</button>`:`<a class="evidence-link" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.label)}</a>`}).join('');
 
 async function boot(){
-  try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json','architecture.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2]);ARCH=loaded[4];DB.portfolios.forEach(p=>p.architecture=ARCH.items[p.id]||{})}
+  try{const loaded=await Promise.all(['data.json','portfolio-details.json','extra-portfolios.json','meeting-directives.json','architecture.json','center-baseline.json'].map(x=>fetch(x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));DB=loaded[0];DETAILS={...loaded[1],...loaded[3]};DB.portfolios.push(...loaded[2]);ARCH=loaded[4];CENTER_BASELINE=loaded[5];DB.portfolios.forEach(p=>p.architecture=ARCH.items[p.id]||{})}
   catch(e){document.body.innerHTML='<main class="empty">تعذر تحميل قاعدة البيانات. افتح المشروع عبر خادم محلي أو GitHub Pages.</main>';return}
   const savedOrder=readLocal(ORDER_KEY,[]);if(savedOrder.length)DB.portfolios.sort((a,b)=>{const ai=savedOrder.indexOf(a.id),bi=savedOrder.indexOf(b.id);return(ai<0?999:ai)-(bi<0?999:bi)});
   state.week=DB.meta.defaultWeek; fillFilters(); bind(); syncViewControls(); render(); reveal();
@@ -36,7 +36,7 @@ function bind(){
   ['weekFilter','scopeFilter','pillarFilter','natureFilter','serviceFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).addEventListener('change',e=>{state[id.replace('Filter','')]=e.target.value;render();if(id==='weekFilter')announceWeekChange()}));
   $('#searchInput').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();render()});
   $('#filterToggle').addEventListener('click',()=>{const bar=$('#filterBar'),open=bar.hidden;bar.hidden=!open;$('#filterToggle').setAttribute('aria-expanded',String(open));$('#filterToggle').classList.toggle('open',open);if(open)setTimeout(()=>$('#searchInput').focus(),80)});
-  $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture'};fillFilters();['scopeFilter','pillarFilter','natureFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).value='all');$('#searchInput').value='';document.body.classList.remove('priority-edit');syncViewControls();render()});
+  $('#resetFilters').addEventListener('click',()=>{state={week:DB.meta.defaultWeek,scope:'all',pillar:'all',nature:'all',service:'all',status:'all',priority:'all',leader:'all',search:'',priorityEdit:false,view:'architecture',baselineStatus:'all',baselineResponse:'all',baselineSearch:''};fillFilters();['scopeFilter','pillarFilter','natureFilter','statusFilter','priorityFilter','leaderFilter'].forEach(id=>$('#'+id).value='all');$('#searchInput').value='';document.body.classList.remove('priority-edit');syncViewControls();render()});
   $('#presentationBtn').addEventListener('click',()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
   $('#dataBtn').addEventListener('click',()=>$('#dataDialog').showModal());
   $('#dataDialog .close').addEventListener('click',()=>$('#dataDialog').close());
@@ -48,6 +48,8 @@ function bind(){
   $('#portfolioDialog').addEventListener('click',e=>{if(e.target.closest('[data-print]')){document.body.classList.add('print-portfolio');setPortfolioPrintTitle();window.print();return}const done=e.target.closest('[data-complete]');if(done){completeWork(done.dataset.portfolio,done.dataset.complete);return}const evidence=e.target.closest('[data-evidence]');if(evidence)alert(evidence.dataset.evidence)});
   addEventListener('afterprint',()=>{document.body.classList.remove('print-portfolio','print-weekly');if(document.body.dataset.screenTitle){document.title=document.body.dataset.screenTitle;delete document.body.dataset.screenTitle}});
   $('#servicesGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-open]');if(btn)openPortfolio(btn.dataset.open)});
+  $('#servicesGrid').addEventListener('change',e=>{if(e.target.id==='baselineStatusFilter'){state.baselineStatus=e.target.value;renderServices()}if(e.target.id==='baselineResponseFilter'){state.baselineResponse=e.target.value;renderServices()}});
+  $('#servicesGrid').addEventListener('input',e=>{if(e.target.id==='baselineSearchInput'){state.baselineSearch=e.target.value.trim().toLowerCase();renderCenterBaseline();requestAnimationFrame(()=>{const input=$('#baselineSearchInput');input?.focus();input?.setSelectionRange(input.value.length,input.value.length)})}});
   $$('.view-toggle [data-view]').forEach(btn=>btn.addEventListener('click',()=>{state.view=btn.dataset.view;state.priorityEdit=false;document.body.classList.remove('priority-edit');syncViewControls();renderServices()}));
   bindDragAndDrop();
   addEventListener('resize',debounce(renderCharts,180));
@@ -57,7 +59,7 @@ function week(){return DB.weeks.find(w=>w.id===state.week)}
 function relevant(){return DB.portfolios.filter(p=>p.weeks.includes(state.week))}
 function displayed(){return state.scope==='active'?relevant():DB.portfolios}
 function filtered(){return displayed().filter(p=>{const leaders=String((p.poc||p.boc)?.agency||'').split(/[،,]/).map(x=>x.trim()),a=p.architecture||{},natureMatch=state.nature==='all'||(state.nature==='sustainable'&&a.nature?.includes('مستدام'))||(state.nature==='temporary'&&a.nature?.includes('مؤقت'));return(state.pillar==='all'||a.pillar===state.pillar)&&natureMatch&&(state.service==='all'||p.id===state.service)&&(state.status==='all'||p.status===state.status)&&(state.priority==='all'||p.priority===state.priority)&&(state.leader==='all'||leaders.includes(state.leader))&&(!state.search||JSON.stringify({...p,details:DETAILS[p.id]}).toLowerCase().includes(state.search))})}
-function syncViewControls(){const titles={architecture:'الخريطة المعمارية للمسارات',portfolios:'الحالة التنفيذية لكل محفظة',technical:'سجل مشروعات التطوير التقني',actions:'سجل الأعمال القادمة حسب الأولوية',operations:'التسليم والتشغيل بعد الإطلاق'};$$('.view-toggle [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view));$('#portfolioViewTitle').textContent=titles[state.view];$('#priorityModeBtn').style.display=state.view==='portfolios'?'':'none'}
+function syncViewControls(){const titles={architecture:'الخريطة المعمارية للمسارات',portfolios:'الحالة التنفيذية لكل محفظة',technical:'سجل مشروعات التطوير التقني',actions:'سجل الأعمال القادمة حسب الأولوية',operations:'التسليم والتشغيل بعد الإطلاق',centerBaseline:'خط أساس مركز معلومات الحج والعمرة'};$$('.view-toggle [data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view));$('#portfolioViewTitle').textContent=titles[state.view];$('#priorityModeBtn').style.display=state.view==='portfolios'?'':'none'}
 function updateFilterUI(){const keys=['scope','pillar','nature','service','status','priority','leader'],count=keys.filter(k=>state[k]!=='all').length+(state.search?1:0),ps=filtered(),active=ps.filter(p=>p.weeks.includes(state.week)).length,badge=$('#activeFilterCount');badge.textContent=ar(count);badge.hidden=!count;$('#filterSummary').textContent=count?`${ar(ps.length)} محفظة مطابقة · ${ar(active)} عليها نشاط في ${week().label}`:'عرض جميع المحافظ والمسارات'}
 function activityFor(p){if(!p.weeks.includes(state.week))return null;const keys={visa:['التأشيرة','الدخول'],ota:['OTA','المنصات'],classification:['التصنيف'],catering:['الإعاشة'],traveler:['حقيبة'],flights:['الرحلات','الطيران'],'external-agents':['التأهيل','الوكلاء'],'tourism-integration':['السياحة','الفنادق','المرشدين'],'nusuk-app':['الإجهاد','نسك'],'marketing-incentives':['الحوافز']}[p.id]||[];const hit=week().timeline.find(t=>keys.some(k=>(t.title+' '+t.detail).includes(k)));return hit?`${hit.title}: ${hit.detail}`:'نشاط مسجل ضمن نطاق الأسبوع؛ تفاصيل الحدث بانتظار المطابقة البندية مع سجل المحفظة.'}
 
@@ -104,6 +106,7 @@ function animate(ms,draw){const reduced=matchMedia('(prefers-reduced-motion: red
 function renderDecisions(){$('#decisionList').innerHTML=DB.decisions.map(d=>`<div class="decision ${d.priority==='حرج'?'needs-attention':''}"><span>${esc(d.priority)}</span><b>${esc(d.title)}</b><small>${esc(d.detail)}</small></div>`).join('')}
 
 function renderServices(){
+  if(state.view==='centerBaseline')return renderCenterBaseline();
   const ps=filtered();
   if(state.view==='architecture')return renderArchitecture(ps);
   if(state.view==='technical')return renderTechnicalRegister(ps);
@@ -123,6 +126,26 @@ function renderServices(){
     <div class="next-action" style="margin-top:8px"><span>الدعم المطلوب</span>${esc(p.support)}</div>
     <button class="portfolio-open" data-open="${p.id}">فتح غرفة المتابعة ←</button>
   </article>`}).join(''):'<div class="empty">لا توجد محافظ تطابق المرشحات الحالية.</div>';
+}
+
+function renderCenterBaseline(){
+  const headers=CENTER_BASELINE.headers,all=CENTER_BASELINE.rows;
+  const statuses=[...new Set(all.map(r=>baselineText(r['حالة الطلب'])))].sort((a,b)=>a.localeCompare(b,'ar'));
+  const responses=[...new Set(all.map(r=>baselineText(r['الإستجابة'])))].sort((a,b)=>a.localeCompare(b,'ar'));
+  const rows=all.filter(r=>(state.baselineStatus==='all'||baselineText(r['حالة الطلب'])===state.baselineStatus)&&(state.baselineResponse==='all'||baselineText(r['الإستجابة'])===state.baselineResponse)&&(!state.baselineSearch||JSON.stringify(r).toLowerCase().includes(state.baselineSearch)));
+  $('#servicesGrid').classList.remove('actions-view','architecture-view');$('#servicesGrid').classList.add('center-baseline-view');
+  $('#resultsCount').textContent=`${ar(rows.length)} من ${ar(all.length)} طلبًا · ${ar(headers.length)} حقلاً كما وردت`;
+  $('#servicesGrid').innerHTML=`<section class="baseline-source-head"><div><span>المصدر الرسمي</span><b>${esc(CENTER_BASELINE.source)}</b><small>الورقة: ${esc(CENTER_BASELINE.sheet)} · البيانات معروضة دون إعادة تصنيف أو استنتاج</small></div><div class="baseline-filters"><label>حالة الطلب<select id="baselineStatusFilter"><option value="all">جميع الحالات</option>${statuses.map(x=>`<option value="${esc(x)}" ${state.baselineStatus===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label><label>الاستجابة<select id="baselineResponseFilter"><option value="all">جميع الاستجابات</option>${responses.map(x=>`<option value="${esc(x)}" ${state.baselineResponse===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label><label class="baseline-search">بحث في جميع الحقول<input id="baselineSearchInput" value="${esc(state.baselineSearch)}" placeholder="رقم الطلب، المالك، الوصف…"></label></div></section><section class="baseline-table-shell"><table class="center-baseline-table"><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td title="${esc(baselineDisplay(r[h],h))}">${esc(baselineDisplay(r[h],h))}</td>`).join('')}</tr>`).join('')}</tbody></table></section>${rows.length?'':'<div class="empty">لا توجد سجلات تطابق التصفية الحالية.</div>'}`;
+}
+
+function baselineText(value){return value===null||value===undefined||String(value).trim()===''?'(فارغ)':String(value).trim()}
+function baselineDisplay(value,header){
+  if(value===null||value===undefined||value==='')return '—';
+  if(typeof value==='number'&&['تاريخ الإستلام','تاريخ الإسناد للمحلل','التاريخ المستهدف','التاريخ المتوقع'].includes(header)){
+    const date=new Date(Date.UTC(1899,11,30)+value*86400000);
+    return Number.isNaN(date.getTime())?String(value):date.toLocaleDateString('ar-SA',{timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit'});
+  }
+  return String(value);
 }
 
 function renderArchitecture(ps){
