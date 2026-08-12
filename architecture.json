@@ -23,7 +23,11 @@
     "makkah-notifications":{"pillar":"specialized","elementType":"أتمتة تشغيلية","nature":"مستدام بعد التسليم","technicalState":"منجز تقنيًا","operatingState":"مسلّم للتشغيل","operationsOwner":"إدارة التأشيرات والتصاريح"},
     "classification":{"pillar":"enablement","elementType":"محفظة حوكمة أداء","nature":"مستدام","technicalState":"قيد التحسين","operatingState":"تشغيل قائم","operationsOwner":"إدارة التصنيف والامتثال"},
     "asp":{"pillar":"enablement","elementType":"محفظة تمكين تقني","nature":"مستدام","technicalState":"متعثر","operatingState":"تشغيل جزئي","operationsOwner":"مركز المعلومات + مزودو ASP"},
-    "governance":{"pillar":"enablement","elementType":"محفظة حوكمة","nature":"مستدام","technicalState":"قيد التفعيل","operatingState":"تشغيل مستمر","operationsOwner":"إدارة متابعة الأنظمة الرقمية"}
+    "governance":{"pillar":"enablement","elementType":"محفظة حوكمة","nature":"مستدام","technicalState":"قيد التفعيل","operatingState":"تشغيل مستمر","operationsOwner":"إدارة متابعة الأنظمة الرقمية"},
+    "supplier-contracts":{"pillar":"agents","elementType":"محفظة تعاقدات","nature":"مستدام","technicalState":"متطلبات مقبولة متعددة الحالات","operatingState":"تشغيل قائم مع تطوير","operationsOwner":"وكالة العمرة + مركز معلومات الحج والعمرة"},
+    "incidents-violations":{"pillar":"enablement","elementType":"محفظة رقابة وامتثال","nature":"مستدام","technicalState":"متطلبات مقبولة متعددة الحالات","operatingState":"تشغيل قائم مع تطوير","operationsOwner":"وكالة العمرة + مركز معلومات الحج والعمرة"},
+    "data-reporting":{"pillar":"enablement","elementType":"محفظة بيانات وتقارير","nature":"مستدام","technicalState":"متطلبات مقبولة متعددة الحالات","operatingState":"تشغيل قائم مع تطوير","operationsOwner":"مكتب إدارة البيانات + مركز معلومات الحج والعمرة"},
+    "supporting-digital-services":{"pillar":"enablement","elementType":"محفظة خدمات رقمية","nature":"مستدام","technicalState":"متطلبات مقبولة متعددة الحالات","operatingState":"تشغيل قائم مع تطوير","operationsOwner":"وكالة العمرة + مركز معلومات الحج والعمرة"}
   },
   "closureGates":["اكتمال التطوير","نجاح الاختبار","قبول مالك الأعمال","الإتاحة في الإنتاج","نشر الدليل والتدريب عند الحاجة","تسليم التشغيل","إرفاق دليل الإنجاز","تحديد مؤشرات الأثر"]
 }
