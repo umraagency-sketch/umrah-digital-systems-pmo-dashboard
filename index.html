@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071916">
   <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
   <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
-  <link rel="stylesheet" href="assets/styles.css?v=20260812-baseline1">
+  <link rel="stylesheet" href="assets/styles.css?v=20260812-baseline2">
 </head>
 <body>
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -57,8 +57,8 @@
 
     <section class="executive-grid reveal">
       <article class="glass chart-card">
-        <header><div><p class="eyebrow">مؤشر المحفظة</p><h2>وضع المتطلبات</h2></div><span class="source-chip">خط الأساس + تحديث الزملاء</span></header>
-        <div class="donut-wrap"><canvas id="donutChart" width="260" height="260" aria-label="توزيع حالات المتطلبات"></canvas><div class="donut-center"><b id="donutTotal">122</b><span>متطلباً</span></div></div>
+        <header><div><p class="eyebrow">مؤشر المحفظة</p><h2>وضع المتطلبات</h2></div><span class="source-chip">Book1.xlsx · الاستجابة: مقبول</span></header>
+        <div class="donut-wrap"><canvas id="donutChart" width="260" height="260" aria-label="توزيع حالات الطلبات المقبولة كما وردت من المركز"></canvas><div class="donut-center"><b id="donutTotal">122</b><span>طلباً مقبولاً</span></div></div>
         <div id="statusLegend" class="legend"></div>
       </article>
       <article class="glass chart-card wide">
@@ -93,7 +93,7 @@
   <dialog id="dataDialog">
     <button class="close" aria-label="إغلاق">×</button>
     <p class="eyebrow">منهجية البيانات</p><h2>كيف تُقرأ اللوحة؟</h2>
-    <p>تعتمد اللوحة على ملف بيانات JSON مُنسّق حسب الأسبوع والخدمة. إجمالي 122 هو آخر رقم معلن في الاجتماع الأسبوعي بتاريخ 9 أغسطس 2026. ويعرض التفصيل 74 متطلباً موثقاً في ملف خط الأساس V12.03، و48 بنداً تحت المطابقة البندية. أُعلن مؤشر تقدم 44% مع 33 بنداً مكتملاً؛ ويظل المؤشر منفصلاً عن نسبة الإغلاق حتى تتطابق الحالات بنداً بنداً.</p>
+    <p>يعتمد عرض خط أساس المركز على ملف Book1.xlsx كما ورد: 209 سجلات و23 حقلاً. يعرض مؤشر الحالات الطلبات ذات الاستجابة «مقبول» وعددها 122، مع إبقاء مسميات الحالات والقيم الفارغة كما هي دون إعادة تصنيف أو تخمين.</p>
     <p>المبادرات التشغيلية تُعرض داخل الخدمات، لكنها لا تُضاف تلقائياً إلى إجمالي المتطلبات التقنية منعاً للازدواجية.</p>
   </dialog>
   <dialog id="portfolioDialog" class="portfolio-dialog">
@@ -105,6 +105,6 @@
     <div id="weeklyReport"></div>
   </dialog>
   <div id="weekToast" class="week-toast" role="status" aria-live="polite"></div>
-  <script src="assets/app.js?v=20260812-baseline1" defer></script>
+  <script src="assets/app.js?v=20260812-baseline2" defer></script>
 </body>
 </html>

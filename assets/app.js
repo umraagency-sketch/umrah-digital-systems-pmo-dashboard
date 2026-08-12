@@ -87,11 +87,14 @@ function renderMetrics(){
 function renderCharts(){cancelAnimationFrame(raf.pop()); drawDonut(); drawTrend()}
 function setupCanvas(canvas,h){const dpr=Math.min(devicePixelRatio||1,2),rect=canvas.getBoundingClientRect();canvas.width=rect.width*dpr;canvas.height=h*dpr;const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);return{ctx,w:rect.width,h}}
 function drawDonut(){
-  const c=$('#donutChart'),data=DB.requirements.baselineStatus,items=[['done','منتهي'],['progress','تطوير'],['study','دراسة'],['pending','معلّق'],['out','خارج النطاق'],['unclassified','غير مصنف']];
-  const {ctx,w,h}=setupCanvas(c,230),cx=w/2,cy=h/2,r=Math.min(w,h)*.37,total=Object.values(data).reduce((a,b)=>a+b,0);
-  $('#donutTotal').textContent=ar(DB.requirements.reportedTotal);
-  $('#statusLegend').innerHTML=items.map(([k,l])=>`<div class="legend-row"><i style="background:${COLORS[k]}"></i><span>${l}</span><b>${ar(data[k])}</b></div>`).join('');
-  animate(900,p=>{ctx.clearRect(0,0,w,h);ctx.lineWidth=17;ctx.lineCap='round';let a=-Math.PI/2;items.forEach(([k])=>{const span=(data[k]/total)*Math.PI*2*p;ctx.beginPath();ctx.strokeStyle=COLORS[k];ctx.arc(cx,cy,r,a+.035,a+Math.max(.04,span-.035));ctx.stroke();a+=span})});
+  const c=$('#donutChart'),accepted=CENTER_BASELINE.rows.filter(r=>baselineText(r['الإستجابة'])==='مقبول'),counts=new Map();
+  accepted.forEach(r=>{const key=baselineText(r['حالة الطلب']);counts.set(key,(counts.get(key)||0)+1)});
+  const palette=['#38c995','#60aee8','#d2b46d','#9c89d9','#e5786d','#62c4b5','#e6a65d','#76a9ea','#b8ca70','#cf7fb4','#8b9a96','#d7dbe0'];
+  const items=[...counts.entries()].sort((a,b)=>b[1]-a[1]).map(([label,value],i)=>({label,value,color:palette[i%palette.length]}));
+  const {ctx,w,h}=setupCanvas(c,230),cx=w/2,cy=h/2,r=Math.min(w,h)*.37,total=accepted.length;
+  $('#donutTotal').textContent=ar(total);
+  $('#statusLegend').innerHTML=items.map(x=>`<div class="legend-row"><i style="background:${x.color}"></i><span>${esc(x.label)}</span><b>${ar(x.value)}</b></div>`).join('');
+  animate(900,p=>{ctx.clearRect(0,0,w,h);ctx.lineWidth=17;ctx.lineCap='round';let a=-Math.PI/2;items.forEach(x=>{const span=(x.value/total)*Math.PI*2*p;ctx.beginPath();ctx.strokeStyle=x.color;ctx.arc(cx,cy,r,a+.025,a+Math.max(.035,span-.025));ctx.stroke();a+=span})});
 }
 function drawTrend(){
   const c=$('#trendChart'),{ctx,w,h}=setupCanvas(c,230),pad={x:32,y:28},weeks=DB.weeks,max=Math.max(...weeks.flatMap(x=>[x.metrics.outputs,x.metrics.communications]))+3;
@@ -260,8 +263,9 @@ function buildRaci(governance,p){
 
 function renderTimeline(){$('#timeline').innerHTML=week().timeline.map(t=>`<div class="timeline-item"><time>${esc(t.date)}</time><b>${esc(t.title)}</b><p>${esc(t.detail)}</p></div>`).join('')}
 function renderBaseline(){
-  const rows=[['خط الأساس الموثق',DB.requirements.documentedBaseline],['إضافات قيد المطابقة',DB.requirements.underReconciliation],['الإجمالي المُبلّغ عنه',DB.requirements.reportedTotal]];
-  $('#baselineBreakdown').innerHTML=rows.map(([l,v])=>`<div class="baseline-row"><div><span>${l}</span><b>${ar(v)}</b></div><div class="bar"><i style="width:${v/DB.requirements.reportedTotal*100}%"></i></div></div>`).join('')+`<p class="service-meta">المصدر: ${esc(DB.requirements.source)}</p>`;
+  const total=CENTER_BASELINE.rows.length,accepted=CENTER_BASELINE.rows.filter(r=>baselineText(r['الإستجابة'])==='مقبول').length,withoutResponse=CENTER_BASELINE.rows.filter(r=>baselineText(r['الإستجابة'])==='(فارغ)').length;
+  const rows=[['إجمالي سجلات Book1',total],['الاستجابة: مقبول',accepted],['الاستجابة: فارغ',withoutResponse]];
+  $('#baselineBreakdown').innerHTML=rows.map(([l,v])=>`<div class="baseline-row"><div><span>${l}</span><b>${ar(v)}</b></div><div class="bar"><i style="width:${v/total*100}%"></i></div></div>`).join('')+`<p class="service-meta">المصدر: ${esc(CENTER_BASELINE.source)} · الورقة: ${esc(CENTER_BASELINE.sheet)} · جميع الحقول كما وردت</p>`;
 }
 function countUp(el,target){const start=performance.now(),dur=750;function tick(now){let p=Math.min(1,(now-start)/dur);el.textContent=ar(Math.round(target*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(tick)}requestAnimationFrame(tick)}
 function reveal(){const o=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.08});$$('.reveal').forEach(x=>o.observe(x))}
