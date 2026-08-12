@@ -335,3 +335,4 @@ html{scroll-behavior:auto}.ambient i{animation:none;filter:none;opacity:.13}.top
   body.print-portfolio .risk-section{display:none!important}
   body.print-portfolio #portfolioDetail>.delivery-summary{grid-template-columns:repeat(6,minmax(0,1fr))!important}
 }
+.agency-kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:22px}.agency-kpi-grid div{padding:18px;border:1px solid rgba(204,164,66,.25);border-radius:18px;background:rgba(255,255,255,.035);display:flex;flex-direction:column;gap:5px;text-align:center}.agency-kpi-grid b{font-size:32px;color:var(--gold)}.agency-kpi-grid span{color:var(--muted);font-weight:700}.agency-baseline-view .record-response{min-width:145px}@media(max-width:900px){.agency-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.agency-kpi-grid div:last-child{grid-column:1/-1}}
