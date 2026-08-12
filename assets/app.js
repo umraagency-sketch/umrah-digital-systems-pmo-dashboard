@@ -72,6 +72,7 @@ function render(){
 function announceWeekChange(){const w=week(),toast=$('#weekToast');document.body.classList.remove('week-switched');void document.body.offsetWidth;document.body.classList.add('week-switched');toast.textContent=`تم تحميل ${w.label}: ${w.metrics.outputs} مخرجات و${w.metrics.decisions} قرارات`;toast.classList.add('show');clearTimeout(announceWeekChange.timer);announceWeekChange.timer=setTimeout(()=>{toast.classList.remove('show');document.body.classList.remove('week-switched')},2600)}
 
 function renderMetrics(){
+  $('#metrics').hidden=true;
   const ps=filtered(),active=ps.filter(p=>p.weeks.includes(state.week)).length,items=ps.flatMap(p=>workItemsFor(p,DETAILS[p.id])),open=items.filter(x=>x.status!=='done').length,avg=ps.length?Math.round(ps.reduce((n,p)=>n+p.progress,0)/ps.length):0;
   const cards=[
     ['المحافظ المطابقة',ps.length,'وفق المرشحات الحالية','accent'],
