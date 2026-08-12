@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071916">
   <meta name="description" content="لوحة إدارة متابعة الأنظمة الرقمية لوكالة العمرة">
   <title>إدارة متابعة الأنظمة الرقمية | وكالة العمرة</title>
-  <link rel="stylesheet" href="assets/styles.css?v=20260812-baseline2">
+  <link rel="stylesheet" href="assets/styles.css?v=20260812-baseline3">
 </head>
 <body>
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -55,12 +55,7 @@
 
     <section class="metric-grid reveal" id="metrics"></section>
 
-    <section class="executive-grid reveal">
-      <article class="glass chart-card">
-        <header><div><p class="eyebrow">مؤشر المحفظة</p><h2>وضع المتطلبات</h2></div><span class="source-chip">Book1.xlsx · الاستجابة: مقبول</span></header>
-        <div class="donut-wrap"><canvas id="donutChart" width="260" height="260" aria-label="توزيع حالات الطلبات المقبولة كما وردت من المركز"></canvas><div class="donut-center"><b id="donutTotal">122</b><span>طلباً مقبولاً</span></div></div>
-        <div id="statusLegend" class="legend"></div>
-      </article>
+    <section class="executive-grid executive-grid-main reveal">
       <article class="glass chart-card wide">
         <header><div><p class="eyebrow">نبض التنفيذ</p><h2>النشاط عبر الأسابيع</h2></div><span id="activityTotal" class="source-chip"></span></header>
         <canvas id="trendChart" height="220" aria-label="منحنى النشاط الأسبوعي"></canvas>
@@ -105,6 +100,6 @@
     <div id="weeklyReport"></div>
   </dialog>
   <div id="weekToast" class="week-toast" role="status" aria-live="polite"></div>
-  <script src="assets/app.js?v=20260812-baseline2" defer></script>
+  <script src="assets/app.js?v=20260812-baseline3" defer></script>
 </body>
 </html>
